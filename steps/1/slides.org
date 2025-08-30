@@ -1,0 +1,98 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+#+startup: beamer overview indent
+#+LANGUAGE: pt-br
+#+TAGS: noexport(n)
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+EXPORT_SELECT_TAGS: export
+
+#+Title: *Análise de desempenho*
+#+Subtitle: Etapa I
+#+Author: Francisco Pegoraro Etcheverria, Pedro Henrique Boniatti Colle, Vinícius Daniel Spadotto
+#+Date: \today
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [xcolor=dvipsnames,10pt]
+#+OPTIONS: H:1 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+LATEX_HEADER: \input{../../lib/org-babel.tex}
+
+* Description
+
+Our object of study consists of an application aimed at solving a determinate number of iterations of partial differential equations over a discrete three dimensional grid.
+
+This can be used in the process of RTM (Reverse Time Migration), which solves bidirectional wave equations to create detailed images of the subsoil with the help of _[[https://github.com/gabrielfrtg/fletcher-io][Fletcher]]_.
+
+#+latex: \pause
+
+#+attr_latex: :center no :width .51\linewidth
+[[../../img/rtm.jpeg]]
+
+* Analysis method
+
+Since the aforementioned application has already been built and its source code is publicly available, it is imperative to analyze it using *measurements*.
+
+PCAD (Parque de Computação de Alto Desempenho) will be used to run the experiments, in which CPUs and GPUs will be used to measure the *speedup*, *efficiency*, *execution time*
+and *MSamples/s* using *OpenMP* and *CUDA*.
+
+* Justification
+
+The study of the given application has been chosen due to the group's experience in parallel programming and the members' ongoing researches in the field of RTM and Fletcher.
+
+* Metrics definition
+
+** Execution time
+
+The total time it took the application to finish its tasks.
+
+#+latex: \pause
+
+** Speedup
+
+Let $T(1)$ be the execution time of the application running on a single thread (sequential).
+The speedup is given by
+\[S(n) = \frac{T(1)}{T(n)}\]
+where $n$ is the number of processing units.
+
+#+latex: \pause
+
+** Efficiency (OpenMP only)
+
+The efficiency $E(n)$ is given by
+\[E(n) = \frac{S(n)}{n}\]
+and denotes how well the application scales with its resources.
+
+* Metrics definition
+
+** MSamples/s
+
+The amount of $10^6$ samples processed in a second by the application, measuring only *meaningful* workload, that is, initialization delays and latencies and will ignored.
+
+** OpenMP and CUDA
+
+The experiments will be split in two categories: *CPU* and *GPU*, and each one will be measured separately.
+
+In regards to the *CPUs*, the number of cores will vary throughout the experiments, whereas in the *GPUs* their models will vary.
+
+* Schedule
+#+caption: Schedule with predicted finishing dates
+#+LATEX_HEADER: \usepackage{array}
+#+attr_latex: :align |>{\centering\arraybackslash}m{2cm}|m{9cm}|
+|---------+-------------------------------------------------------------------------------------------|
+| *Date*  | *Task*                                                                                    |
+|---------+-------------------------------------------------------------------------------------------|
+| 14/09   | Reference application successfully built and deployed to PCAD with OpenMP and CUDA        |
+|---------+-------------------------------------------------------------------------------------------|
+| 28/09   | Have some experiments run with some parameters                                            |
+|---------+-------------------------------------------------------------------------------------------|
+| 05/10   | Interpret the collected results and build data visualizations                             |
+|---------+-------------------------------------------------------------------------------------------|
+| 06/10   | Present the data acquired                                                                 |
+|---------+-------------------------------------------------------------------------------------------|
+| 26/10   | Automate the experiments running processes and generalize to the established metrics      |
+|---------+-------------------------------------------------------------------------------------------|
+| 09/11   | Automate the data visualization using R                                                   |
+|---------+-------------------------------------------------------------------------------------------|
+| 30/11   | Build the report using the given automations                                              |
+|---------+-------------------------------------------------------------------------------------------|
+| 01/12   | Present the final results with the report built                                           |
+|---------+-------------------------------------------------------------------------------------------|
