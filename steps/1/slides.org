@@ -18,9 +18,13 @@
 
 * Description
 
-Our object of study consists of an application aimed at solving a determinate number of iterations of partial differential equations over a discrete three dimensional grid.
+Our object of study is the _[[https://github.com/gabrielfrtg/fletcher-io][Fletcher]]_ application. 
+It executes the process of RTM (Reverse Time Migration), which solves 
+bidirectional wave equations to create detailed images of the subsoil.
 
-This can be used in the process of RTM (Reverse Time Migration), which solves bidirectional wave equations to create detailed images of the subsoil with the help of _[[https://github.com/gabrielfrtg/fletcher-io][Fletcher]]_.
+This process consists in solving a determinate number 
+of iterations of partial differential equations over a discrete three dimensional grid.
+
 
 #+latex: \pause
 
@@ -29,9 +33,10 @@ This can be used in the process of RTM (Reverse Time Migration), which solves bi
 
 * Analysis method
 
-Since the aforementioned application has already been built and its source code is publicly available, it is imperative to analyze it using *measurements*.
+We've choosen to do *direct measurements* on the applications execution, given that we have access to it's source code.
 
-PCAD (Parque de Computação de Alto Desempenho) will be used to run the experiments, in which CPUs and GPUs will be used to measure the *speedup*, *efficiency*, *execution time*
+We'll be using the infraestructure of PCAD (Parque de Computação de Alto Desempenho) to run the experiments,
+in which CPUs and GPUs will be used to measure the *speedup*, *efficiency*, *execution time*
 and *MSamples/s* using *OpenMP* and *CUDA*.
 
 #+latex: \pause
