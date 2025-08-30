@@ -34,6 +34,16 @@ Since the aforementioned application has already been built and its source code 
 PCAD (Parque de Computação de Alto Desempenho) will be used to run the experiments, in which CPUs and GPUs will be used to measure the *speedup*, *efficiency*, *execution time*
 and *MSamples/s* using *OpenMP* and *CUDA*.
 
+#+latex: \pause
+#+latex: \vspace{0.5cm}
+
+The objective of this study is to:
+- Evaluate the **performance** and  **scalability** of the application on CPUs (OpenMP) and GPUs (CUDA).
+- Compare performance across different workloads by varying parameters.
+- Assess how well the application exploits hardware resources.
+- Identify **performance bottlenecks** using profiling tools.
+
+
 * Justification
 
 The study of the given application has been chosen due to the group's experience in parallel programming and the members' ongoing researches in the field of RTM and Fletcher.
