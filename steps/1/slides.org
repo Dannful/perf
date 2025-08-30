@@ -6,8 +6,8 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+EXPORT_SELECT_TAGS: export
 
-#+Title: *Análise de desempenho*
-#+Subtitle: Etapa I
+#+Title: *Performance analysis*
+#+Subtitle: Step I
 #+Author: Francisco Pegoraro Etcheverria, Pedro Henrique Boniatti Colle, Vinícius Daniel Spadotto
 #+Date: \today
 
