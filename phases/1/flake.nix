@@ -7,7 +7,6 @@
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
             texlive.combined.scheme-full
-            emacs
             gnumake
           ];
         };

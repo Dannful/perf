@@ -12,7 +12,12 @@
             DoE_base
             FrF2
             tidyverse
+            janitor
           ];
         };
-      in { devShell = pkgs.mkShell { buildInputs = [ rEnv ]; }; });
+      in {
+        devShell = pkgs.mkShell {
+          buildInputs = [ rEnv pkgs.texlive.combined.scheme-full ];
+        };
+      });
 }

@@ -1,0 +1,18 @@
+Problem is anisotropic with tilted transversely isotropy using sigma=0.750000
+Grid size is (250,250,250) with spacing (1.00,1.00,1.00); simulated area (249.00,249.00,249.00) 
+Grid is extended by 25 absortion points and 4 border points at each extreme
+Wave is propagated at internal+absortion points of size (300,300,300)
+Source at coordinates (154,154,154)
+Will run 300 time steps of 1.000000 to reach time 300.000000
+Execution with OpenMP directives on 2 threads
+OpenACC directives disabled
+Recomended maximum time step is 0.000055; used time step is 1.000000
+File TTI.rsf contains time evolution of (0:307,0:307,0:307)
+ch1dxx=0.145963; ch1dyy=0.354037; ch1dzz=0.500000; ch1dxy=0.454649; ch1dxz=0.540302; ch1dyz=0.841471
+vsv=7.436374e+02; vpz=1.721186e+03, v2pz=2.962482e+06
+v2sz=5.529966e+05; v2pz=2.962482e+06, v2px=4.384474e+06, v2pn=3.554979e+06
+Execution time (s) is 1145.030395
+Total execution time (s) is 1169.378768
+MSamples/s 7
+Memory High Water Mark is 2285344 kB
+original,TTI,250,250,250,25,1.00,1.00,1.00,1.000000,300.000000,1758507019734779673,1758508189113547380,1145.030395,1169.378768,7

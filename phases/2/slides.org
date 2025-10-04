@@ -1,0 +1,285 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+#+startup: beamer overview indent
+#+LANGUAGE: pt-br
+#+TAGS: noexport(n)
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+EXPORT_SELECT_TAGS: export
+
+#+Title: *Performance analysis*
+#+Subtitle: Step II
+#+Author: Francisco Pegoraro Etcheverria, Pedro Henrique Boniatti Colle, Vinícius Daniel Spadotto
+#+Date: \today
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [xcolor=dvipsnames,10pt]
+#+OPTIONS: H:1 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+LATEX_HEADER: \input{../../lib/org-babel.tex}
+
+* Introduction
+
+Our object of study is the _[[https://github.com/gabrielfrtg/fletcher-io][Fletcher]]_ application. 
+It executes the process of RTM (Reverse Time Migration), which solves 
+bidirectional wave equations to create detailed images of the subsoil.
+
+This process consists in solving a determinate number 
+of iterations of partial differential equations over a discrete three dimensional grid.
+
+
+#+latex: \pause
+
+#+attr_latex: :center no :width .51\linewidth
+[[../../img/rtm.jpeg]]
+* Environment description
+
+The experiments ran at *PCAD* on the *draco1* machine, which technical details follow:
+- CPU: 2 x Intel(R) Xeon(R) E5-2640 v2, 2.00 GHz, 32 threads, 16 cores
+- RAM: 64 GB DDR3
+- GPU: NVIDIA Tesla K20m
+- Disco: 1.8TB HDD
+- Placa-mãe: Dell Inc. 0KR8W3
+
+* Data collection methods
+
+The data through executing the *full factorial* experimental model using
+only *CPU* with *OpenMP*.
+
+The experiments' factors follow:
+- *Size*: $100 \times 100 \times 100$ and $250 \times 250 \times 250$
+- *Iterations*: $30$ and $300$
+- *Threads*: $1$, $2$, $4$, $8$, $16$ and $32$
+- *Replications*: 2 (3 executions total)
+
+#+begin_src R :colnames yes :results value :exports results
+  library(tidyverse)
+  library(here)
+
+  source(here::here("phases/2/GenerateExperiments.R"))
+  read.csv(here::here("phases/2/cpu.csv")) |>
+    slice_head(n = 6) |>
+    mutate(Size = as.character(Size)) |>
+    mutate(Iterations = as.character(Iterations)) |>
+    mutate(Threads = as.character(Threads)) |>
+    mutate(Blocks = as.character(Blocks)) |>
+    bind_rows(tibble(Size = "...", Iterations = "...", Threads = "...", Blocks = "..."))
+#+end_src
+
+#+latex: \pause
+
+#+RESULTS:
+| Size | Iterations | Threads | Blocks |
+|------+------------+---------+--------|
+|  250 |         30 |       8 |    0.1 |
+|  250 |        300 |       1 |    0.1 |
+|  100 |        300 |       2 |    0.1 |
+|  100 |         30 |       1 |    0.1 |
+|  250 |         30 |       1 |    0.1 |
+|  100 |        300 |       4 |    0.1 |
+|  ... |        ... |     ... |    ... |
+
+* Data collection methods
+
+Each experiment run generated a file under a directory structure:
+
+#+begin_src
+experiments/{SIZE}/{ITERATIONS}/{THREADS}/{REPLICATION}.out*
+#+end_src
+
+The program itself displayed no need to be instrumented, since it had already been collecting the required metrics
+for the purposes of the present analysis. Therefore, the source code had no need to be modified.\\
+
+The output of the program is an stdout dump containing the aforementioned metrics in a plain text format. It is hence sufficient
+to parse such file and extract the required information.
+
+#+latex: \pause
+
+#+begin_src
+Execution time (s) is 20.438588
+Total execution time (s) is 20.607164
+MSamples/s 3
+#+end_src
+
+We'll be analysing *Execution time*, which indicates the time the application took
+to run the calculations, and the *MSamples/s*, which represents the throughput.
+
+* Results
+
+Here are some results taken from the outputs of the experiments.
+
+This is the data that will be fed to the charts.
+
+#+begin_src R :results value :exports results :session :colnames yes
+  library(tidyverse)
+  library(janitor)
+  library(here)
+
+  experiments <- read.csv(here::here("phases/2/cpu.csv"))
+
+  read_row_data <- function(Size, Iterations, Threads, Blocks) {
+    dir_path <- here::here(paste0("phases/2/experiments", "/", Size, "/", Iterations, "/", Threads))
+    stdout_path <- paste0(dir_path, "/.", Blocks, ".out")
+    stdout_lines <- readLines(stdout_path)
+    render_line <- grep("Execution time", stdout_lines, value = TRUE)
+    time_str <- str_extract(render_line, "^Execution time \\(s\\) is ([0-9.]+)$", group = 1)
+    time_numeric <- as.numeric(time_str)
+    render_line <- grep("MSamples/s", stdout_lines, value = TRUE)
+    msamples_str <- str_extract(render_line, "^MSamples/s ([0-9.]+)$", group = 1)
+    msamples_numeric <- as.numeric(msamples_str)
+
+    tibble(
+      metric = c("msamples", "time"),
+      value = c(msamples_numeric, time_numeric)
+    )
+  }
+
+  results <- experiments |>
+                  mutate(`Blocks` = substring(Blocks, 3)) %>%
+  		mutate(results = pmap(., read_row_data)) |>
+  		unnest(results)
+
+  results <- clean_names(results)
+                  
+  results |>
+    slice_head(n = 12) |>
+    mutate(value = round(value, digits = 3))
+#+end_src
+
+#+RESULTS:
+| size | iterations | threads | blocks | metric   |    value |
+|------+------------+---------+--------+----------+----------|
+|  250 |         30 |       8 |      1 | msamples |       24 |
+|  250 |         30 |       8 |      1 | time     |   33.502 |
+|  250 |        300 |       1 |      1 | msamples |        4 |
+|  250 |        300 |       1 |      1 | time     | 2120.626 |
+|  100 |        300 |       2 |      1 | msamples |        5 |
+|  100 |        300 |       2 |      1 | time     |  108.425 |
+|  100 |         30 |       1 |      1 | msamples |        3 |
+|  100 |         30 |       1 |      1 | time     |   20.439 |
+|  250 |         30 |       1 |      1 | msamples |        4 |
+|  250 |         30 |       1 |      1 | time     |  209.556 |
+|  100 |        300 |       4 |      1 | msamples |        9 |
+|  100 |        300 |       4 |      1 | time     |   54.818 |
+
+* Results
+
+#+begin_src R :session :exports none :results none
+  total_times <- results |>
+    filter(metric == "time") |>
+    select(-metric) |>
+    group_by(size, iterations, threads) |>
+    summarise(value = mean(value))
+
+  total_msamples <- results |>
+    filter(metric == "msamples") |>
+    select(-metric) |>
+    group_by(size, iterations, threads) |>
+    summarise(value = mean(value))
+
+  labeller <- function(labels) {
+    tibble(size = paste0(labels$size, " x ", labels$size, " x ", labels$size),
+           iterations = paste0(labels$iterations, " iterations"))
+  }
+
+  meu_estilo <- function() {
+      list(
+      theme_bw(base_size = 12),
+      theme(
+          legend.title = element_blank(),
+          legend.spacing = unit(1, "mm"),
+          legend.position = "right",
+          legend.justification = "left",
+          legend.box.spacing = unit(0, "pt"),
+          legend.box.margin = margin(0, 0, 0, 0),
+          axis.text.x = element_text(angle=45, vjust=1, hjust=1)    
+      ))
+  }
+
+#+end_src
+
+#+NAME: total_times
+#+begin_src R :session :exports results :results graphics file :file total_times.pdf
+  total_times_plot <- ggplot(total_times, aes(x = threads, y = value)) +
+    geom_point() +
+    geom_line() +
+    scale_x_continuous(trans = "log2", breaks = 2^(0:10)) +
+    facet_wrap(size~iterations, scales = "free_y", labeller = labeller) +
+    labs(x = "Threads", y = "Execution time (s)") +
+    meu_estilo()
+  ggsave(here::here("phases/2/total_times.pdf"), total_times_plot)
+#+end_src
+
+#+ATTR_LATEX: :height 0.9\textheight
+#+RESULTS: total_times
+[[file:total_times.pdf]]
+
+* Results
+
+#+NAME: total_msamples
+#+begin_src R :session :exports results :results graphics file :file total_msamples.pdf
+  total_msamples_plot <- ggplot(total_msamples, aes(x = threads, y = value)) +
+    geom_point() +
+    geom_line() +
+    scale_x_continuous(trans = "log2", breaks = 2^(0:10)) +
+    facet_wrap(size~iterations, labeller = labeller) +
+    labs(x = "Threads", y = "MSamples/s") +
+    meu_estilo()
+  ggsave(here::here("phases/2/total_msamples.pdf"), total_msamples_plot)
+#+end_src
+
+#+ATTR_LATEX: :height 0.9\textheight
+#+RESULTS: total_msamples
+[[file:total_msamples.pdf]]
+
+* Results
+
+From the observed data, we conclude that there was significant gain in
+performance from *1* through *16* threads.\\
+
+This is expected, since the machine the experiments ran on had *16* physical cores,
+leading to oversubscription for 32 threads.\\
+
+It is not possible to conclude with the observed data that any significant degradation
+in performance occurs with higher workload.\\
+
+* Challenges
+
+Since the members of the group had already been involved with the object of study,
+the majority of the challenges in regards to using the application and measuring its data
+had been faced beforehand.\\
+
+However, some technical issues where dealt with in regards to how to properly *handle* and
+*visualize* the results of the application in an objective manner.\\
+
+Moreover, it is still a challenge as to how we'll compile the program with *CUDA* and interpret its results.
+
+* Schedule
+#+caption: Schedule with predicted finishing dates
+#+LATEX_HEADER: \usepackage{array}
+#+attr_latex: :align |>{\centering\arraybackslash}m{1cm}|m{0.66cm}|m{9cm}|
+|--------+--------+--------------------------------------------------------------------------------------|
+| *Date* | *Done* | *Task*                                                                               |
+|--------+--------+--------------------------------------------------------------------------------------|
+| 14/09  | Yes    | Reference application successfully built and deployed to PCAD with OpenMP and CUDA   |
+|--------+--------+--------------------------------------------------------------------------------------|
+| 28/09  | Yes    | Have some experiments run with some parameters                                       |
+|--------+--------+--------------------------------------------------------------------------------------|
+| 05/10  | Yes    | Interpret the collected results and build data visualizations                        |
+|--------+--------+--------------------------------------------------------------------------------------|
+| 06/10  | No     | Present the data acquired                                                            |
+|--------+--------+--------------------------------------------------------------------------------------|
+| 12/10  | No     | Rerun experiments with Vtune profiler                                                |
+|--------+--------+--------------------------------------------------------------------------------------|
+| 26/10  | Yes    | Automate the experiments running processes and generalize to the established metrics |
+|--------+--------+--------------------------------------------------------------------------------------|
+| 09/11  | Yes    | Automate the data visualization using R                                              |
+|--------+--------+--------------------------------------------------------------------------------------|
+| 16/11  | No     | Run experiments with CUDA and rerun CPU experiments in a different set of machines   |
+|--------+--------+--------------------------------------------------------------------------------------|
+| 30/11  | No     | Build the report using the given automations                                         |
+|--------+--------+--------------------------------------------------------------------------------------|
+| 01/12  | No     | Present the final results with the report built                                      |
+|--------+--------+--------------------------------------------------------------------------------------|
+
+* Finalization
+
+Thank you so much! :)
