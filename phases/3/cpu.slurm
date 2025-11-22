@@ -11,23 +11,23 @@ CSV_FILE=./cpu.csv
 mapfile -t csv_lines < <(tail -n +2 "$CSV_FILE")
 
 source env.sh
-cd original
+cd original || exit
 make backend=OpenMP
 cd ..
 
 for line in "${csv_lines[@]}"; do
-    [[ -z "$line" ]] && continue # skip empty
+  [[ -z "$line" ]] && continue # skip empty
 
-    IFS=',' read -r size iterations threads blocks <<< "$line"
+  IFS=',' read -r size iterations threads blocks <<<"$line"
 
-    echo "============================="
-    echo "  Size: $size"
-    echo "  Iterations: $iterations"
-    echo "  Threads: $threads"
-    echo "  Blocks: $blocks"
+  echo "============================="
+  echo "  Size: $size"
+  echo "  Iterations: $iterations"
+  echo "  Threads: $threads"
+  echo "  Blocks: $blocks"
 
-    absorption=$(( $size/10 ))
-    path=$(hostname)/$size/$iterations/$threads
-    mkdir -p $path
-    OMP_NUM_THREADS=$threads ./original/ModelagemFletcher.exe TTI $size $size $size $absorption 1 1 1 1 $iterations ./value.dc 0 2>&1 > $path/$blocks.out
+  absorption=16
+  path=$(hostname)/$size/$iterations/$threads
+  mkdir -p "$path"
+  OMP_NUM_THREADS=$threads ./original/ModelagemFletcher.exe TTI "$size" "$size" "$size" $absorption 1 1 1 1 "$iterations" ./value.dc 0 2>&1 >"$path"/"$blocks".out
 done

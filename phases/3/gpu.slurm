@@ -11,23 +11,24 @@ CSV_FILE=./gpu.csv
 mapfile -t csv_lines < <(tail -n +2 "$CSV_FILE")
 
 source env.sh
-cd original
+cd original || exit
+# Ignoring this for now
 GPU_SM=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader | awk -F. '{print "sm-"$1$2}')
-CUDA_GPU_SM=make backend=CUDA
+make backend=CUDA
 cd ..
 
 for line in "${csv_lines[@]}"; do
-    [[ -z "$line" ]] && continue # skip empty
+  [[ -z "$line" ]] && continue # skip empty
 
-    IFS=',' read -r size iterations blocks <<< "$line"
+  IFS=',' read -r size iterations blocks <<<"$line"
 
-    echo "============================="
-    echo "  Size: $size"
-    echo "  Iterations: $iterations"
-    echo "  Blocks: $blocks"
+  echo "============================="
+  echo "  Size: $size"
+  echo "  Iterations: $iterations"
+  echo "  Blocks: $blocks"
 
-    absorption=$(( $size/10 ))
-    path=$(hostname)/$size/$iterations
-    mkdir -p $path
-    ./original/ModelagemFletcher.exe TTI $size $size $size $absorption 1 1 1 1 $iterations ./value.dc 0 2>&1 > $path/$blocks.out
+  absorption=16
+  path=$(hostname)/$size/$iterations
+  mkdir -p "$path"
+  ./original/ModelagemFletcher.exe TTI "$size" "$size" "$size" $absorption 1 1 1 1 "$iterations" ./value.dc 0 2>&1 >"$path"/"$blocks".out
 done
