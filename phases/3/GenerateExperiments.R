@@ -9,7 +9,7 @@ generate_experiment <- function(factors, seed, path) {
         readr::write_csv(path)
 }
 
-sizes <- c(32, 64, 128)
+sizes <- c(24, 56, 120)
 iterations <- c(10, 100, 1000)
 
 seed <- 0
