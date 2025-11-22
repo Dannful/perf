@@ -17,13 +17,13 @@ generate_experiment <- function(factors, seed, path) {
 
 seed <- 0
 cpu_factors <- list(
-  Size = c(100, 250),
-  Iterations = c(30, 300),
+  Size = c(100, 250, 500),
+  Iterations = c(30, 300, 3000, 30000),
   Threads = c(1, 2, 4, 8, 16, 32)
 )
 gpu_factors <- list(
   Size = c(100, 250),
-  Iterations = c(30, 300)
+  Iterations = c(30, 300, 3000, 30000, 300000)
 )
 generate_experiment(cpu_factors, seed, "./cpu.csv")
 generate_experiment(gpu_factors, seed, "./gpu.csv")
