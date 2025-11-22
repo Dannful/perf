@@ -17,8 +17,8 @@ generate_experiment <- function(factors, seed, path) {
 
 absorb_size <- 4
 
-sizes <- c(100, 200, 300) |> map(function(s) 32 * (s %/% 32) - (2 * (absorb_size + 4))
-iterations <- c(10, 100, 1000, 10000)
+sizes <- c(50, 80, 120) |> map(function(s) 32 * (s %/% 32) + (2 * (absorb_size + 4))
+iterations <- c(10, 100, 1000)
 
 seed <- 0
 cpu_factors <- list(
