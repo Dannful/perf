@@ -82,7 +82,7 @@ experiment_results <- process_experiment_data()
 experiment_results_clean <- experiment_results |>
     filter(!is.na(value))
 experiment_results_clean <- experiment_results_clean |>
-    filter(num_threads != 32)
+    filter(is.na(num_threads) | num_threads != 32)
 
 cpu_data <- experiment_results_clean |>
     filter(device == "cpu", metric_name == "computation_time_s")
