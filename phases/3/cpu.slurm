@@ -10,6 +10,8 @@
 CSV_FILE=./cpu.csv
 mapfile -t csv_lines < <(tail -n +2 "$CSV_FILE")
 
+cp -r . $SCRATCH/fletcher-io
+cd $SCRATCH/fletcher-io
 source env.sh
 cd original || exit
 make backend=OpenMP
@@ -27,7 +29,7 @@ for line in "${csv_lines[@]}"; do
   echo "  Blocks: $blocks"
 
   absorption=16
-  path=$(hostname)/$size/$iterations/$threads
+  path=$HOME/fletcher_results/$(hostname)/$size/$iterations/$threads
   mkdir -p "$path"
   OMP_NUM_THREADS=$threads ./original/ModelagemFletcher.exe TTI "$size" "$size" "$size" $absorption 1 1 1 1 "$iterations" ./value.dc 0 2>&1 >"$path"/"$blocks".out
 done

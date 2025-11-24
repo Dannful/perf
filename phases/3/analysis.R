@@ -8,8 +8,8 @@ library(grid)
 
 base_dir <- here::here("phases/3")
 
-cpu_machine_name <- "lunaris"
-gpu_machine_name <- "draco"
+cpu_machine_name <- "draco2-cpu"
+gpu_machine_name <- "draco3-gpu"
 
 read_experiment_file <- function(full_file_path) {
     file_content <- tryCatch({
@@ -81,6 +81,8 @@ experiment_results <- process_experiment_data()
 
 experiment_results_clean <- experiment_results |>
     filter(!is.na(value))
+experiment_results_clean <- experiment_results_clean |>
+    filter(num_threads != 32)
 
 cpu_data <- experiment_results_clean |>
     filter(device == "cpu", metric_name == "computation_time_s")

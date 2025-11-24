@@ -13,8 +13,7 @@ sizes <- c(24, 56, 120)
 iterations <- c(10, 100, 1000)
 
 seed <- 0
-cpu_factors <- list(Size = sizes, Iterations = iterations, Threads = c(1, 2, 4, 8,
-    16, 32))
+draco_cpu_factors <- list(Size = sizes, Iterations = iterations, Threads = c(1, 2, 4, 8, 16))
 gpu_factors <- list(Size = sizes, Iterations = iterations)
-generate_experiment(cpu_factors, seed, "./cpu.csv")
+generate_experiment(draco_cpu_factors, seed, "./cpu.csv")
 generate_experiment(gpu_factors, seed, "./gpu.csv")
