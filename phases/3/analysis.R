@@ -8,8 +8,8 @@ library(grid)
 
 base_dir <- here::here("phases/3")
 
-cpu_machine_name <- "draco2-cpu"
-gpu_machine_name <- "draco3-gpu"
+cpu_machine_name <- "draco1-gpu"
+gpu_machine_name <- "draco2-cpu"
 
 read_experiment_file <- function(full_file_path) {
     file_content <- tryCatch({
@@ -172,3 +172,59 @@ dev.off()
 
 print("Analysis complete. Plots saved to analysis_plots.pdf")
 
+
+cat("\nChecking what GPU metrics exist:\n")
+print(unique(experiment_results_clean$metric_name))
+
+# --- 99% CONFIDENCE INTERVALS FOR GPU ---
+
+compute_ci <- function(x, conf = 0.99) {
+    n <- length(x)
+    mean_x <- mean(x)
+    se <- sd(x) / sqrt(n)
+    alpha <- 1 - conf
+    tcrit <- qt(1 - alpha/2, df = n - 1)
+
+    tibble(
+        mean = mean_x,
+        lower = mean_x - tcrit * se,
+        upper = mean_x + tcrit * se,
+        n = n
+    )
+}
+
+# Use all GPU metrics that exist
+gpu_times <- experiment_results_clean %>%
+    filter(device == "gpu")
+
+# --------- CI WITH ALL REPLICATIONS ---------
+gpu_ci_all <- gpu_times %>%
+    group_by(metric_name, problem_size, num_iterations) %>%
+    summarise(ci = list(compute_ci(value)), .groups = "drop") %>%
+    tidyr::unnest_wider(ci)
+
+cat("\n=== 99% Confidence Intervals (ALL REPLICATIONS) ===\n")
+print(gpu_ci_all)
+
+
+# --------- CI WITH SAMPLE OF 10 REPLICATIONS ---------
+set.seed(123)
+
+gpu_ci_sample10 <- gpu_times %>%
+    group_by(metric_name, problem_size, num_iterations) %>%
+    summarise(
+        sample_values = list({
+            v <- value
+            if (length(v) > 10) sample(v, 10) else v
+        }),
+        .groups = "drop"
+    ) %>%
+    mutate(ci = map(sample_values, compute_ci)) %>%
+    select(-sample_values) %>%
+    tidyr::unnest_wider(ci)
+
+cat("\n=== 99% Confidence Intervals (SAMPLE OF 10) ===\n")
+print(gpu_ci_sample10)
+
+print(gpu_ci_all, n = Inf)
+print(gpu_ci_sample10, n = Inf)
