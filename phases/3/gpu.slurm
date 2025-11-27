@@ -10,7 +10,9 @@
 CSV_FILE=./gpu.csv
 mapfile -t csv_lines < <(tail -n +2 "$CSV_FILE")
 
+rm -r $SCRATCH/fletcher-io
 cp -r . $SCRATCH/fletcher-io
+
 cd $SCRATCH/fletcher-io
 source env.sh
 cd original || exit
@@ -33,4 +35,6 @@ for line in "${csv_lines[@]}"; do
   path=$HOME/fletcher_results/$(hostname)/$size/$iterations
   mkdir -p "$path"
   ./original/ModelagemFletcher.exe TTI "$size" "$size" "$size" $absorption 1 1 1 1 "$iterations" ./value.dc 0 2>&1 >"$path"/"$blocks".out
+  rm TTI.rsf@
+  rm TTI.rsf
 done
