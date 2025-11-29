@@ -42,20 +42,13 @@ p1 <- ggplot(filter(experiment_results_clean, metric_name == "computation_time_s
     theme_minimal()
 print(p1)
 
-p2 <- ggplot(filter(experiment_results_clean, device == "cpu", metric_name == "msamples_per_sec"),
-    aes(x = num_threads, y = value, color = as.factor(problem_size))) + geom_point() +
-    geom_line() + facet_wrap(~problem_size, scales = "free_y") + labs(title = "CPU Performance vs Number of Threads",
-    x = "Number of Threads", y = "Performance (MSamples/s)", color = "Problem Size") +
-    theme_minimal() + theme(legend.position = "none")
-print(p2)
-
 if (nrow(cpu_speedup) > 0) {
-    p3 <- ggplot(cpu_speedup, aes(x = num_threads, y = speedup, color = as.factor(problem_size))) +
+    p2 <- ggplot(cpu_speedup, aes(x = num_threads, y = speedup, color = as.factor(problem_size))) +
         geom_point() + geom_line() + geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
         facet_wrap(~problem_size, scales = "free_y") + labs(title = "CPU Thread Speedup",
         x = "Number of Threads", y = "Speedup Factor", color = "Problem Size") +
         theme_minimal() + theme(legend.position = "none")
-    print(p3)
+    print(p2)
 }
 
 lm_data <- experiment_results_clean |>
@@ -67,12 +60,10 @@ if (nrow(lm_data) > 0) {
     cat("\n--- Linear Model Summary ---\n")
     print(summary(model))
 
-    # Create a long-format data frame for plotting
     lm_data_long <- lm_data |>
         mutate(predicted = predict(model)) |>
         tidyr::pivot_longer(cols = c("value", "predicted"), names_to = "type", values_to = "msamples_per_sec")
 
-    # Create the new plot
     p_lm1 <- ggplot(lm_data_long, aes(x = num_threads, y = msamples_per_sec, color = type)) +
         geom_point(alpha = 0.6) + geom_line(aes(group = type), alpha = 0.6) + facet_grid(problem_size ~
         num_iterations, scales = "free_y") + labs(x = "Number of Threads", y = "Performance (MSamples/s)",
