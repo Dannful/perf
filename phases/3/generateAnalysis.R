@@ -4,6 +4,21 @@ library(grid)
 library(purrr)
 library(tidyr)
 
+my_style <- function() {
+  list(
+    theme_bw(base_size = 12),
+    theme(
+      legend.title = element_blank(),
+      plot.margin = unit(c(0, 0, 0, 0), "cm"),
+      legend.spacing = unit(1, "mm"),
+      legend.position = "right",
+      legend.justification = "left",
+      legend.box.spacing = unit(0, "pt"),
+      legend.box.margin = margin(0, 0, 0, 0),
+      axis.text.x = element_text(angle=45, vjust=1, hjust=1)    
+    ))
+}
+
 experiment_results_clean <- read.csv("./clean_dataset.csv")
 
 cpu_data <- experiment_results_clean |>
@@ -39,7 +54,7 @@ p1 <- ggplot(filter(experiment_results_clean, metric_name == "computation_time_s
     aes(x = problem_size, y = value, color = as.factor(num_threads))) + geom_point(alpha = 0.8) +
     geom_line(alpha = 0.8) + facet_grid(num_iterations ~ device) + labs(title = "Computation Time vs Problem Size",
     x = "Problem Size", y = "Computation Time (seconds)", color = "Number of Threads") +
-    theme_minimal()
+    my_style()
 print(p1)
 
 if (nrow(cpu_speedup) > 0) {
@@ -47,7 +62,7 @@ if (nrow(cpu_speedup) > 0) {
         geom_point() + geom_line() + geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
         facet_wrap(~problem_size, scales = "free_y") + labs(title = "CPU Thread Speedup",
         x = "Number of Threads", y = "Speedup Factor", color = "Problem Size") +
-        theme_minimal() + theme(legend.position = "none")
+        my_style() + theme(legend.position = "none")
     print(p2)
 }
 
@@ -67,7 +82,7 @@ if (nrow(lm_data) > 0) {
     p_lm1 <- ggplot(lm_data_long, aes(x = num_threads, y = msamples_per_sec, color = type)) +
         geom_point(alpha = 0.6) + geom_line(aes(group = type), alpha = 0.6) + facet_grid(problem_size ~
         num_iterations, scales = "free_y") + labs(x = "Number of Threads", y = "Performance (MSamples/s)",
-        color = "Type") + theme_minimal()
+        color = "Type") + my_style()
 
     grid.newpage()
     pushViewport(viewport(layout = grid.layout(2, 1, heights = unit(c(0.1, 0.9),
