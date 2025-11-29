@@ -1,25 +1,18 @@
 library(dplyr)
 library(stringr)
+library(tidyr)
+library(purrr)
 library(tibble)
 library(here)
-library(purrr)
-library(grid)
-
-base_dir <- here::here("phases/3/experiments")
-
-cpu_machine_name <- "draco2-cpu"
-gpu_machine_name <- "draco1-gpu"
 
 read_experiment_file <- function(full_file_path) {
-    file_content <- tryCatch({
-        readLines(full_file_path, warn = FALSE)
-    }, error = function(e) {
-        warning(sprintf("File read failed for: %s | Reason: %s", full_file_path,
-            e$message), call. = FALSE)
-        return(NULL)
-    })
-
-    return(file_content)
+    tryCatch(
+        readLines(full_file_path, warn = FALSE),
+        error = function(e) {
+            warning(sprintf("File read failed: %s | %s", full_file_path, e$message))
+            NULL
+        }
+    )
 }
 
 extract_metrics <- function(log_lines) {
@@ -27,89 +20,152 @@ extract_metrics <- function(log_lines) {
         return(tibble(metric_name = character(), value = numeric()))
     }
 
-    patterns <- tibble(pattern = c("Execution time [(]s[)] is (\\d+\\.?\\d*)", "Total execution time [(]s[)] is (\\d+\\.?\\d*)",
-        "MSamples/s (\\d+\\.?\\d*)"), metric_name = c("computation_time_s", "total_time_s",
-        "msamples_per_sec"))
+    patterns <- tibble(
+        pattern = c(
+            "Execution time [(]s[)] is (\\d+\\.?\\d*)",
+            "Total execution time [(]s[)] is (\\d+\\.?\\d*)",
+            "MSamples/s (\\d+\\.?\\d*)"
+        ),
+        metric_name = c("computation_time_s", "total_time_s", "msamples_per_sec")
+    )
 
     log_text <- paste(log_lines, collapse = "\n")
 
-    extracted_data <- patterns |>
+    patterns |>
         rowwise() |>
-        mutate(value_str = str_extract(log_text, pattern), value = str_extract(value_str,
-            "(\\d+\\.?\\d*)")) |>
+        mutate(value_str = str_extract(log_text, pattern),
+               value     = str_extract(value_str, "(\\d+\\.?\\d*)")) |>
         ungroup() |>
         select(metric_name, value) |>
         mutate(value = as.numeric(value))
-
-    return(extracted_data)
 }
 
-process_experiment_data <- function() {
-    cpu_dir <- file.path(base_dir, cpu_machine_name)
-    gpu_dir <- file.path(base_dir, gpu_machine_name)
-
-    cpu_files <- if (dir.exists(cpu_dir)) {
-        list.files(cpu_dir, recursive = TRUE, pattern = "\\.out$", full.names = TRUE,
-            all.files = TRUE)
-    } else {
-        character(0)
+read_cpu_results <- function(folder, machine_name, experiment_number) {
+  cat("Looking in:", folder, "\n")
+  
+  files <- list.files(folder, pattern = "\\.out$", recursive = TRUE, 
+                      full.names = TRUE, all.files = TRUE)
+  
+  cat("Files found:", length(files), "\n")
+  
+  if (length(files) == 0) {
+    return(NULL)
+  }
+  
+  results_list <- lapply(files, function(f) {
+    rel_path <- sub(paste0("^", folder, "/?"), "", f)
+    parts <- strsplit(rel_path, "/")[[1]]
+    
+    if (length(parts) != 4) {
+      warning(sprintf("Unexpected CPU path structure: %s (expected 4 parts, got %d)", 
+                      rel_path, length(parts)))
+      return(NULL)
     }
-
-    gpu_files <- if (dir.exists(gpu_dir)) {
-        list.files(gpu_dir, recursive = TRUE, pattern = "\\.out$", full.names = TRUE,
-            all.files = TRUE)
-    } else {
-        character(0)
+    
+    problem_size <- as.numeric(parts[1])
+    iterations <- as.numeric(parts[2])
+    threads <- as.numeric(parts[3])
+    replication <- as.numeric(gsub("^\\.(\\d+)\\.out$", "\\1", parts[4]))
+    
+    log_lines <- read_experiment_file(f)
+    metrics <- extract_metrics(log_lines)
+    
+    if (nrow(metrics) == 0) {
+      return(NULL)
     }
-
-    all_files <- c(cpu_files, gpu_files)
-
-    if (length(all_files) == 0) {
-        stop(paste("No .out files found in the base directory:", base_dir))
-    }
-
-    all_paths_tbl <- tibble(full_file_path = all_files) |>
-        mutate(file_path_relative = str_extract(full_file_path, paste0("(", cpu_machine_name,
-            "|", gpu_machine_name, ").*")))
-
-    write.csv(all_paths_tbl, "debug_paths_before_filter.csv")
-
-    all_paths_tbl <- all_paths_tbl |>
-        filter(!is.na(file_path_relative))
-
-    cpu_regex <- paste0("^", cpu_machine_name, "/([^/]+)/([^/]+)/([^/]+)/\\.([^/]+)\\.out$")
-    gpu_regex <- paste0("^", gpu_machine_name, "/([^/]+)/([^/]+)/\\.([^/]+)\\.out$")
-
-    cpu_matches <- str_match(all_paths_tbl$file_path_relative, cpu_regex)
-    gpu_matches <- str_match(all_paths_tbl$file_path_relative, gpu_regex)
-
-    all_paths_tbl <- all_paths_tbl |>
-        mutate(machine = str_extract(file_path_relative, paste0("^", cpu_machine_name,
-            "|", gpu_machine_name)), device = as.factor(ifelse(machine == cpu_machine_name,
-            "cpu", "gpu")), problem_size = as.integer(coalesce(cpu_matches[, 2],
-            gpu_matches[, 2])), num_iterations = as.integer(coalesce(cpu_matches[,
-            3], gpu_matches[, 3])), num_threads = as.integer(ifelse(device == "gpu",
-            1, cpu_matches[, 4])), replication_index = as.integer(coalesce(cpu_matches[,
-            5], gpu_matches[, 4]))) |>
-        mutate(log_content = map(full_file_path, read_experiment_file), extracted_metrics = map(log_content,
-            extract_metrics)) |>
-        select(-file_path_relative) |>
-        tidyr::unnest(extracted_metrics) |>
-        select(device, machine, problem_size, num_iterations, num_threads, replication_index,
-            metric_name, value) |>
-        mutate(metric_name = as.factor(metric_name))
-
-    print(all_paths_tbl)
-
-    return(all_paths_tbl)
+    
+    metrics |>
+      mutate(
+        experiment = experiment_number,
+        device = "cpu",
+        machine = machine_name,
+        problem_size = problem_size,
+        num_iterations = iterations,
+        num_threads = threads,
+        replication_index = replication
+      )
+  })
+  
+  do.call(rbind, Filter(Negate(is.null), results_list))
 }
 
-experiment_results <- process_experiment_data()
+read_gpu_results <- function(folder, machine_name, experiment_number) {
+  cat("Looking in:", folder, "\n")
+  
+  files <- list.files(folder, pattern = "\\.out$", recursive = TRUE, 
+                      full.names = TRUE, all.files = TRUE)
+  
+  cat("Files found:", length(files), "\n")
+  
+  if (length(files) == 0) {
+    return(NULL)
+  }
+  
+  results_list <- lapply(files, function(f) {
+    rel_path <- sub(paste0("^", folder, "/?"), "", f)
+    parts <- strsplit(rel_path, "/")[[1]]
+    
+    if (length(parts) != 3) {
+      warning(sprintf("Unexpected GPU path structure: %s (expected 3 parts, got %d)", 
+                      rel_path, length(parts)))
+      return(NULL)
+    }
+    
+    problem_size <- as.numeric(parts[1])
+    iterations <- as.numeric(parts[2])
+    replication <- as.numeric(gsub("^\\.(\\d+)\\.out$", "\\1", parts[3]))
+    
+    log_lines <- read_experiment_file(f)
+    metrics <- extract_metrics(log_lines)
+    
+    if (nrow(metrics) == 0) {
+      return(NULL)
+    }
+    
+    metrics |>
+      mutate(
+        experiment = experiment_number,
+        device = "gpu",
+        machine = machine_name,
+        problem_size = problem_size,
+        num_iterations = iterations,
+        num_threads = 1,
+        replication_index = replication
+      )
+  })
+  
+  do.call(rbind, Filter(Negate(is.null), results_list))
+}
 
-experiment_results_clean <- experiment_results |>
-    filter(!is.na(value))
-experiment_results_clean <- experiment_results_clean |>
-    filter(is.na(num_threads) | num_threads != 32)
+base_dir <- here::here("phases/3/experiments")
 
-experiment_results_clean |>
-    write.csv("./clean_dataset.csv")
+cat("\n=== Reading Experiment 1 ===\n")
+exp1_draco1 <- read_gpu_results(file.path(base_dir, "draco1-gpu"), "draco1", 1)
+exp1_draco2 <- read_cpu_results(file.path(base_dir, "draco2-cpu"), "draco2", 1)
+
+cat("\n=== Reading Experiment 2 ===\n")
+exp2_draco1 <- read_gpu_results(file.path(base_dir, "exp2_draco1-gpu"), "draco1", 2)
+exp2_draco2 <- read_cpu_results(file.path(base_dir, "exp2_draco2-cpu"), "draco2", 2)
+exp2_beagle <- read_gpu_results(file.path(base_dir, "beagle"), "beagle", 2) 
+
+all_results <- dplyr::bind_rows(
+    exp1_draco1,
+    exp1_draco2,
+    exp2_draco1,
+    exp2_draco2,
+    exp2_beagle
+) |>
+  select(experiment, device, machine, problem_size, num_iterations, 
+         num_threads, replication_index, metric_name, value) |>
+  arrange(experiment, device, machine, problem_size, num_iterations, 
+          num_threads, replication_index, metric_name)
+
+output_file <- file.path(base_dir, "../clean_dataset.csv")
+write.csv(all_results, output_file, row.names = FALSE)
+
+cat("\n=== Summary ===\n")
+cat("Final dataset has", nrow(all_results), "rows\n")
+cat("Columns:", paste(names(all_results), collapse = ", "), "\n")
+cat("\nFirst few rows:\n")
+print(head(all_results, 10))
+cat("\nSaved to:", output_file, "\n")
