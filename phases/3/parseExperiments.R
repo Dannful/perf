@@ -5,7 +5,7 @@ library(here)
 library(purrr)
 library(grid)
 
-base_dir <- here::here("phases/3")
+base_dir <- here::here("phases/3/experiments")
 
 cpu_machine_name <- "draco2-cpu"
 gpu_machine_name <- "draco1-gpu"
@@ -70,11 +70,15 @@ process_experiment_data <- function() {
 
     all_paths_tbl <- tibble(full_file_path = all_files) |>
         mutate(file_path_relative = str_extract(full_file_path, paste0("(", cpu_machine_name,
-            "|", gpu_machine_name, ").*"))) |>
+            "|", gpu_machine_name, ").*")))
+
+    write.csv(all_paths_tbl, "debug_paths_before_filter.csv")
+
+    all_paths_tbl <- all_paths_tbl |>
         filter(!is.na(file_path_relative))
 
-    cpu_regex <- paste0(cpu_machine_name, "/([^/]+)/([^/]+)/([^/]+)/\\.([^/]+)\\.out$")
-    gpu_regex <- paste0(gpu_machine_name, "/([^/]+)/([^/]+)/\\.([^/]+)\\.out$")
+    cpu_regex <- paste0("^", cpu_machine_name, "/([^/]+)/([^/]+)/([^/]+)/\\.([^/]+)\\.out$")
+    gpu_regex <- paste0("^", gpu_machine_name, "/([^/]+)/([^/]+)/\\.([^/]+)\\.out$")
 
     cpu_matches <- str_match(all_paths_tbl$file_path_relative, cpu_regex)
     gpu_matches <- str_match(all_paths_tbl$file_path_relative, gpu_regex)
