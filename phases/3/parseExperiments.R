@@ -45,8 +45,24 @@ extract_metrics <- function(log_lines) {
 }
 
 process_experiment_data <- function() {
-    all_files <- list.files(base_dir, recursive = TRUE, pattern = "\\.out$", full.names = TRUE,
-        all.files = TRUE)
+    cpu_dir <- file.path(base_dir, cpu_machine_name)
+    gpu_dir <- file.path(base_dir, gpu_machine_name)
+
+    cpu_files <- if (dir.exists(cpu_dir)) {
+        list.files(cpu_dir, recursive = TRUE, pattern = "\\.out$", full.names = TRUE,
+            all.files = TRUE)
+    } else {
+        character(0)
+    }
+
+    gpu_files <- if (dir.exists(gpu_dir)) {
+        list.files(gpu_dir, recursive = TRUE, pattern = "\\.out$", full.names = TRUE,
+            all.files = TRUE)
+    } else {
+        character(0)
+    }
+
+    all_files <- c(cpu_files, gpu_files)
 
     if (length(all_files) == 0) {
         stop(paste("No .out files found in the base directory:", base_dir))
@@ -66,11 +82,11 @@ process_experiment_data <- function() {
     all_paths_tbl <- all_paths_tbl |>
         mutate(machine = str_extract(file_path_relative, paste0("^", cpu_machine_name,
             "|", gpu_machine_name)), device = as.factor(ifelse(machine == cpu_machine_name,
-            "cpu", "gpu")),
-            problem_size = as.integer(coalesce(cpu_matches[, 2], gpu_matches[, 2])),
-            num_iterations = as.integer(coalesce(cpu_matches[, 3], gpu_matches[, 3])),
-            num_threads = as.integer(ifelse(device == "gpu", 1, cpu_matches[, 4])),
-            replication_index = as.integer(coalesce(cpu_matches[, 5], gpu_matches[, 4]))) |>
+            "cpu", "gpu")), problem_size = as.integer(coalesce(cpu_matches[, 2],
+            gpu_matches[, 2])), num_iterations = as.integer(coalesce(cpu_matches[,
+            3], gpu_matches[, 3])), num_threads = as.integer(ifelse(device == "gpu",
+            1, cpu_matches[, 4])), replication_index = as.integer(coalesce(cpu_matches[,
+            5], gpu_matches[, 4]))) |>
         mutate(log_content = map(full_file_path, read_experiment_file), extracted_metrics = map(log_content,
             extract_metrics)) |>
         select(-file_path_relative) |>

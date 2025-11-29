@@ -2,6 +2,7 @@ library(ggplot2)
 library(dplyr)
 library(grid)
 library(purrr)
+library(tidyr)
 
 experiment_results_clean <- read.csv("./clean_dataset.csv")
 
@@ -36,9 +37,9 @@ pdf("analysis_plots.pdf", width = 10, height = 8)
 
 p1 <- ggplot(filter(experiment_results_clean, metric_name == "computation_time_s"),
     aes(x = problem_size, y = value, color = as.factor(num_threads))) + geom_point(alpha = 0.8) +
-    geom_line(alpha = 0.8) + facet_grid(num_iterations ~ device, scales = "free_y") +
-    scale_y_log10() + labs(title = "Computation Time vs Problem Size", x = "Problem Size",
-    y = "Computation Time (s, log scale)", color = "Number of Threads") + theme_minimal()
+    geom_line(alpha = 0.8) + facet_grid(num_iterations ~ device) + labs(title = "Computation Time vs Problem Size",
+    x = "Problem Size", y = "Computation Time (seconds)", color = "Number of Threads") +
+    theme_minimal()
 print(p1)
 
 p2 <- ggplot(filter(experiment_results_clean, device == "cpu", metric_name == "msamples_per_sec"),
@@ -57,13 +58,6 @@ if (nrow(cpu_speedup) > 0) {
     print(p3)
 }
 
-if (nrow(gpu_speedup) > 0) {
-    p4 <- ggplot(gpu_speedup, aes(x = as.factor(problem_size), y = speedup)) + geom_col(fill = "skyblue") +
-        labs(title = "GPU vs Single-Threaded CPU Speedup", x = "Problem Size", y = "Speedup Factor") +
-        theme_minimal()
-    print(p4)
-}
-
 lm_data <- experiment_results_clean |>
     filter(device == "cpu", metric_name == "msamples_per_sec")
 
@@ -73,24 +67,23 @@ if (nrow(lm_data) > 0) {
     cat("\n--- Linear Model Summary ---\n")
     print(summary(model))
 
+    # Create a long-format data frame for plotting
+    lm_data_long <- lm_data |>
+        mutate(predicted = predict(model)) |>
+        tidyr::pivot_longer(cols = c("value", "predicted"), names_to = "type", values_to = "msamples_per_sec")
+
+    # Create the new plot
+    p_lm1 <- ggplot(lm_data_long, aes(x = num_threads, y = msamples_per_sec, color = type)) +
+        geom_point(alpha = 0.6) + geom_line(aes(group = type), alpha = 0.6) + facet_grid(problem_size ~
+        num_iterations, scales = "free_y") + labs(x = "Number of Threads", y = "Performance (MSamples/s)",
+        color = "Type") + theme_minimal()
+
     grid.newpage()
-    grid.text("Linear Model Diagnostics", y = 0.9, gp = gpar(fontsize = 16))
-
-    lm_data$predicted <- predict(model)
-    p_lm1 <- ggplot(lm_data, aes(x = value, y = predicted)) + geom_point() + geom_abline(slope = 1,
-        intercept = 0, color = "red") + labs(title = "Actual vs Predicted MSamples/s",
-        x = "Actual", y = "Predicted") + theme_minimal()
-    print(p_lm1)
-
-    p_lm2 <- ggplot(model, aes(x = .fitted, y = .resid)) + geom_point() + geom_hline(yintercept = 0,
-        color = "red") + labs(title = "Residuals vs Fitted", x = "Fitted values",
-        y = "Residuals") + theme_minimal()
-    print(p_lm2)
-
-    p_lm3 <- ggplot(model, aes(sample = .stdresid)) + stat_qq() + stat_qq_line() +
-        labs(title = "Normal Q-Q Plot", x = "Theoretical Quantiles", y = "Standardized Residuals") +
-        theme_minimal()
-    print(p_lm3)
+    pushViewport(viewport(layout = grid.layout(2, 1, heights = unit(c(0.1, 0.9),
+        "npc"))))
+    grid.text("Linear Model Diagnostics: Actual vs. Predicted", gp = gpar(fontsize = 16),
+        vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+    print(p_lm1, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
 }
 
 dev.off()
@@ -143,4 +136,3 @@ print(gpu_ci_sample10)
 
 print(gpu_ci_all, n = Inf)
 print(gpu_ci_sample10, n = Inf)
-
