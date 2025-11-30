@@ -1,0 +1,132 @@
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+#+startup: beamer overview indent
+#+LANGUAGE: pt-br
+#+TAGS: noexport(n)
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+EXPORT_SELECT_TAGS: export
+
+#+Title: *Performance analysis*
+#+Subtitle: Step II
+#+Author: Francisco Pegoraro Etcheverria, Pedro Henrique Boniatti Colle, Vinícius Daniel Spadotto
+#+Date: \today
+
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [xcolor=dvipsnames,10pt]
+#+OPTIONS: H:1 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+LATEX_HEADER: \input{../../../lib/org-babel.tex}
+#+LATEX_HEADER: \usepackage{makecell}
+
+* Introduction
+
+Our object of study is the _[[https://github.com/gabrielfrtg/fletcher-io][Fletcher]]_ application. 
+It executes the process of RTM (Reverse Time Migration), which solves 
+bidirectional wave equations to create detailed images of the subsoil.
+
+This process consists in solving a determinate number 
+of iterations of partial differential equations over a discrete three dimensional grid.
+
+
+#+latex: \pause
+
+#+attr_latex: :center no :width .51\linewidth
+[[../../../img/rtm.jpeg]]
+
+* Methodology
+
+The methodology involved executing experiments with pre-defined factors under controlled conditions to observe the application behavior.
+
+** Objectives
+   - Configure a controlled environment.
+   - Obtain raw data (MSamples/s, execution time and total execution time).
+   - Build a linear regression model relating factors to output.
+
+** Experimental Projects
+   Two full factorial experimental projects were carried out for both CPU and GPU.
+
+   #+CAPTION: Experimental projects for CPU
+   | Project | Input Data Dimensions                  | Iterations    | Threads        |
+   |---------+----------------------------------------+---------------+----------------+
+   |       1 | 24^3, 56^3, 120^3                      | 10, 100, 1000 | 1, 2, 4, 8, 16 |
+   |       2 | 24^3, 88^3, 152^3, 248^3, 376^3, 504^3 | 25            | 1, 2, 4, 8, 16 |
+
+   with $100$ and $10$ replications, respectively.
+
+* Methodology
+
+** Experimental Projects
+
+   #+CAPTION: Experimental projects for GPU
+   | Project | Input Data Dimensions                  | Iterations    | Replications |
+   |---------+----------------------------------------+---------------+--------------|
+   |       1 | 24^3, 56^3, 120^3                      | 10, 100, 1000 | 100          |
+   |       2 | 24^3, 88^3, 152^3, 248^3, 376^3, 504^3 | 25            | 10           |
+
+* Environment
+
+All experiments were executed at PCAD (https://gppd-hpc.inf.ufrgs.br), utilizing the *draco* and *beagle* machines.
+
+#+CAPTION: Machines used for experiments
+| Project | Experiment | Machine |
+|---------+------------+---------|
+|       1 | CPU        | draco2  |
+|       1 | GPU        | draco1  |
+|       2 | CPU        | draco2  |
+|       2 | GPU        | draco1  |
+|       2 | GPU        | beagle  |
+
+* Environment
+
+#+CAPTION: Technical specifications of the machines
+| Machine    | CPU                                                                              | RAM                      | Accelerator                                  | Disk                     |
+|------------+----------------------------------------------------------------------------------+--------------------------+----------------------------------------------+--------------------------|
+| draco[1,2] | \makecell{2 x Intel(R) Xeon(R) \\ E5-2640 v2, 2.00 GHz, \\ 32 threads, 16 cores} | \makecell{64 GB \\ DDR3} | NVIDIA Tesla K20m                            | \makecell{1.8 TB \\ HDD} |
+|------------+----------------------------------------------------------------------------------+--------------------------+----------------------------------------------+--------------------------|
+| beagle     | \makecell{2 x Intel(R) Xeon(R) \\ E5-2650, 2.00 GHz, \\ 32 threads, 16 cores}    | \makecell{32 GB \\ DDR3} | \makecell{2 x NVIDIA GeForce \\ GTX 1080 Ti} | \makecell{931 GB \\ HDD} |
+
+* Results
+
+#+BEGIN_SRC R :exports none
+  source("../parseExperiments.R")
+  source("../generateAnalysis.R")
+#+END_SRC
+
+** Execution vs Total Time (Exp 1)
+   Comparison of pure computation time against total execution time for Experiment 1.
+   [[file:../plots/plot1a_execution_vs_total_exp1.pdf]]
+
+* Execution vs Total Time (Exp 2)
+   Comparison of pure computation time against total execution time for Experiment 2, covering larger problem sizes.
+   [[file:../plots/plot1b_execution_vs_total_exp2.pdf]]
+
+* Throughput (Exp 1)
+   Throughput analysis in MSamples/s for Experiment 1.
+   [[file:../plots/plot2a_throughput_exp1.pdf]]
+
+* Throughput (Exp 2)
+   Throughput analysis in MSamples/s for Experiment 2.
+   [[file:../plots/plot2b_throughput_exp2.pdf]]
+
+* CPU Speedup (Exp 1)
+   Speedup achieved by increasing thread count in Experiment 1.
+   [[file:../plots/plot3a_cpu_speedup_exp1.pdf]]
+
+* CPU Speedup (Exp 2)
+   Speedup achieved by increasing thread count in Experiment 2. The scaling behavior is consistent with O(n) complexity.
+   [[file:../plots/plot3b_cpu_speedup_exp2.pdf]]
+
+* CPU Efficiency (Exp 1)
+   Efficiency of CPU resource utilization as thread count increases in Experiment 1.
+   [[file:../plots/plot4a_cpu_efficiency_exp1.pdf]]
+
+* CPU Efficiency (Exp 2)
+   Efficiency of CPU resource utilization in Experiment 2.
+   [[file:../plots/plot4b_cpu_efficiency_exp2.pdf]]
+
+* Overhead Analysis (Exp 1)
+   Percentage of overhead (Total Time - Computation Time) for Experiment 1.
+   [[file:../plots/plot5a_overhead_percent_exp1.pdf]]
+
+* Overhead Analysis (Exp 2)
+   Percentage of overhead for Experiment 2. Larger problem sizes generally reduce the relative impact of overhead.
+   [[file:../plots/plot5b_overhead_percent_exp2.pdf]]

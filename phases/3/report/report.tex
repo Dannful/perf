@@ -119,7 +119,7 @@
 %% "authornote" and "authornotemark" commands
 %% used to denote shared contribution to the research.
 \author{Francisco Pegoraro Etcheverria}
-\author{Pedro Colle}
+\author{Pedro Henrique Boniatti Colle}
 \author{Vinícius Daniel Spadotto}
 \affiliation{%
   \institution{Universidade Federal do Rio Grande do Sul}
@@ -162,9 +162,19 @@
 \maketitle
 
 \section{Introduction}
+O objeto de estudo deste trabalho de análise de desempenho (INF01146/CMP223) é a aplicação Fletcher\footnote{Hospedada no repositório https://github.com/gabrielfrtg/fletcher-base}. Ela se baseia em \cite{FLETCHER}, que estabelece equações diferenciais para computar perturbações em meios inclinados transversalmente isótropos (TTI). A implementação escolhida também implementa os meios isotrópicos (ISO) e verticais transversalmente isótropos (VTI), que são simplificações nas equações da computação de meios TTI. As demais características de implementação e escolhas de design da aplicação estão contidas no seu manual\footnote{Fonte do pdf: https://drive.google.com/file/d/10CmbleCThUxZ9TUJ7gZkhwufPQZa3Nt4/view?usp=drive\_link}.
 
+A aplicação é altamente paralelizável e este trabalho foca em determinar a sua escalabilidade vide a disponibilidade de recursos, assim como identificar \textit{bottle necks} presentes na computação. Utilizou-se diferentes \textit{backends} (CPU e GPU) para a computação, validando a escalabilidade individualmente em cada meio. Computações de meio misto, parte em CPU parte em GPU, ficam fora do escopo deste trabalho. A coleção e análise dos dados gerados destes experimentos busca servir como base para diferentes implementações do algoritmo Fletcher, aperfeiçoando aspectos da aplicação e estendendo suas capacidades, como uma implementação multi máquina usando MPI\cite{MPI}.
 
 \section{Trabalhos relacionados}
+
+A introdução já apresenta a pesquisa central no qual a aplicação Fletcher se baseia \cite{FLETCHER}. O modelo deste trabalho, de analise de desempenho para diferentes parâmetros da aplicação, vai de encontro com a pesquisa de \citet{OPTIMIZEFLETCHER}. A pesquisa apresenta a performance da aplicação em diferentes arquiteturas (\textit{backends}), assim como otimizações para melhor a performance da aplicação quanto a essas. Este trabalho serve como uma extensão dessa pesquisa, testando em arquiteturas mais modernas não presentes na época. 
+
+As limitações da aplicação Fletcher já são conhecidas \cite{OPTIMIZEFLETCHER}. Trabalhos como 
+\citet{IOFLETCH} e  \citet{MPIIOFLETCH} exploram formas de realizar IO para ler computações intermediárias da aplicação, sem causar grandes perdas de performance na aplicação. A análise do gasto energético e portabilidade da aplicação também foi estudado em \citet{ENERGYFLETCH}.
+
+A conclusão desses trabalhos é que muito esforço já foi realizado partindo de uma análise já antiga da aplicação. Uma revisão dessa análise, usando arquiteturas mais modernas, é de alta relevância para os trabalhos que precederam e sucederão.
+
 \section{Metodologia}
 
 A metodologia empregada para a realização do presente trabalho deu-se mediante
@@ -267,14 +277,92 @@ Outrossim, o $R^2$ calculado para a GPU é esperado: dado que a complexidade de 
 do paralelismo, o modelo de regressão dispõe de informações altamente limitadas para determinar como cada fator influencia a saída. Dessa forma, todos os fatores
 acabam por contribuir de maneira similarmente igual e tênue para os valores de saída, conferindo elevada incerteza para o modelo.
 
-%%
-%% The acknowledgments section is defined using the "acks" environment
-%% (and NOT an unnumbered section). This ensures the proper
-%% identification of the section in the article metadata, and the
-%% consistent spelling of the heading.
-\begin{acks}
-To Robert, for the bagels and explaining CMYK and color spaces.
-\end{acks}
+A seguir, detalha-se a análise dos dados coletados através dos gráficos gerados, cobrindo tempo de execução, vazão, speedup, eficiência e overhead.
+
+\subsection{Tempo de Execução}
+A relação entre o tempo de execução e o tamanho total do problema (número de células na grade) é apresentada nas Figuras \ref{fig:exec_time_exp1} e \ref{fig:exec_time_exp2}. Os gráficos confirmam o comportamento linear ($O(n)$) esperado para o algoritmo Fletcher, tanto para o Experimento 1 quanto para o Experimento 2. O aumento nas dimensões do problema resulta em um crescimento proporcional do tempo de computação, validando a escalabilidade algorítmica da aplicação.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot1a_execution_vs_total_exp1.pdf}
+    \caption{Tempo de Execução vs. Tamanho Total do Problema: Experimento 1}
+    \label{fig:exec_time_exp1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot1b_execution_vs_total_exp2.pdf}
+    \caption{Tempo de Execução vs. Tamanho Total do Problema: Experimento 2}
+    \label{fig:exec_time_exp2}
+\end{figure}
+
+\subsection{Vazão (Throughput)}
+As Figuras \ref{fig:throughput_exp1} e \ref{fig:throughput_exp2} ilustram a vazão da aplicação em Milhões de Amostras por Segundo (MSamples/s). Observa-se que a vazão tende a aumentar e estabilizar com tamanhos de problema maiores, indicando um melhor aproveitamento dos recursos computacionais e amortização de custos fixos de inicialização. A comparação entre os experimentos evidencia a capacidade de processamento das diferentes arquiteturas testadas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot2a_throughput_exp1.pdf}
+    \caption{Vazão (MSamples/s): Experimento 1}
+    \label{fig:throughput_exp1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot2b_throughput_exp2.pdf}
+    \caption{Vazão (MSamples/s): Experimento 2}
+    \label{fig:throughput_exp2}
+\end{figure}
+
+\subsection{Speedup (CPU)}
+O speedup obtido com a paralelização em CPU é demonstrado nas Figuras \ref{fig:speedup_exp1} e \ref{fig:speedup_exp2}. O gráfico evidencia o ganho de desempenho ao aumentar o número de threads. Nota-se que o speedup se aproxima do ideal linear para contagens de threads mais baixas, mas apresenta rendimentos decrescentes ao se aproximar do limite de núcleos físicos ou devido à contenção de recursos de memória.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot3a_cpu_speedup_exp1.pdf}
+    \caption{Speedup em CPU: Experimento 1}
+    \label{fig:speedup_exp1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot3b_cpu_speedup_exp2.pdf}
+    \caption{Speedup em CPU: Experimento 2}
+    \label{fig:speedup_exp2}
+\end{figure}
+
+\subsection{Eficiência (CPU)}
+As Figuras \ref{fig:efficiency_exp1} e \ref{fig:efficiency_exp2} apresentam a eficiência paralela. Conforme esperado, a eficiência tende a decrescer com o aumento do número de threads. Esta queda é atribuída à Lei de Amdahl, onde a fração serial do código e o overhead de gerenciamento de threads limitam a eficiência máxima atingível em altas contagens de processadores.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot4a_cpu_efficiency_exp1.pdf}
+    \caption{Eficiência em CPU: Experimento 1}
+    \label{fig:efficiency_exp1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot4b_cpu_efficiency_exp2.pdf}
+    \caption{Eficiência em CPU: Experimento 2}
+    \label{fig:efficiency_exp2}
+\end{figure}
+
+\subsection{Sobrecarga (Overhead)}
+A sobrecarga percentual introduzida pelo paralelismo é mostrada nas Figuras \ref{fig:overhead_exp1} e \ref{fig:overhead_exp2}. O overhead é tipicamente maior para tamanhos de problema menores, onde o tempo de computação útil é insuficiente para mascarar os custos de criação e sincronização de threads. À medida que o tamanho do problema cresce, o overhead percentual tende a diminuir.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot5a_overhead_percent_exp1.pdf}
+    \caption{Sobrecarga Percentual: Experimento 1}
+    \label{fig:overhead_exp1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot5b_overhead_percent_exp2.pdf}
+    \caption{Sobrecarga Percentual: Experimento 2}
+    \label{fig:overhead_exp2}
+\end{figure}
 
 %%
 %% The next two lines define the bibliography style to be used, and
