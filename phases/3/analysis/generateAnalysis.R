@@ -58,11 +58,11 @@ time_summary <- experiment_results_clean |>
     )
 
 plot_time_analysis <- function(data, exp) {
-  ggplot(time_summary |> filter(experiment == exp) |> filter(!is.na(mean_value)), 
-              aes(x = problem_size, y = mean_value, 
-                  color = machine_label, 
-                  linetype = metric_label,
-                  group = interaction(machine_label, metric_label))) +
+    ggplot(time_summary |> filter(experiment == exp) |> filter(!is.na(mean_value)), 
+        aes(x = problem_size, y = mean_value, 
+            color = machine_label, 
+            linetype = metric_label,
+            group = interaction(machine_label, metric_label))) +
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
                   width = 5, alpha = 1.0, linewidth = 0.5) +
     geom_line(linewidth = 0.8) +
@@ -77,7 +77,6 @@ plot_time_analysis <- function(data, exp) {
         )
     ) +
     labs(
-        title = paste("Experimento", exp, ": Tempo de computação vs Tempo total"),
         x = "Tamanho do problema",
         y = "Tempo (s)",
         color = "Máquina / Configuração",
@@ -123,7 +122,6 @@ plot_throughput <- function(data, exp) {
         labeller(num_iterations = function(x) paste0("Iterações: ", x))
     ) +
     labs(
-      title = paste("Experimento", exp, ": Throughput"),
       x = "Tamanho do problema",
       y = "Throughput (MSamples/s)",
       color = "Máquina / Configuração"
@@ -200,7 +198,6 @@ plot_cpu_speedup <- function(data, exp) {
     ) +
     scale_shape_manual(values = c(16, 4)) +
     labs(
-      title = paste("Experimento", exp, ": Speedup (CPU)"),
       x = "Número de Threads",
       y = "Speedup (baseline = 1 thread)",
       color = "Tamanho do problema",
@@ -258,7 +255,6 @@ plot_cpu_efficiency <- function(data, exp) {
     scale_shape_manual(values = c(16, 4)) +
     
     labs(
-      title = paste("Experimento", exp, ": Eficiência (CPU)"),
       x = "Número de Threads",
       y = "Eficiência (Speedup / Threads)",
       color = "Tamanho do problema",
@@ -296,7 +292,6 @@ plot_cpu_vs_gpu_speedup <- function(data, exp) {
     ) +
     scale_shape_manual(values = c(16, 4)) +
     labs(
-      title = paste("Experimento", exp, ": Speedup (CPU)"),
       x = "Número de Threads",
       y = "Speedup (baseline = 1 thread)",
       color = "Tamanho do problema",
@@ -343,7 +338,6 @@ plot_overhead_pct <- function(data, exp) {
     scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
     
     labs(
-      title = paste("Experimento", exp, ": Overhead Médio vs Tamanho do Problema"),
       y = "Overhead Médio (% do tempo total)",
       x = "Tamanho do Problema",
       color = "Máquina / Configuração"
