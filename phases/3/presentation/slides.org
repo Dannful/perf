@@ -87,46 +87,59 @@ All experiments were executed at PCAD (https://gppd-hpc.inf.ufrgs.br), utilizing
 * Results
 
 #+BEGIN_SRC R :exports none
-  source("../parseExperiments.R")
-  source("../generateAnalysis.R")
+  source("../analysis/parseExperiments.R")
+  source("../analysis/generateAnalysis.R")
 #+END_SRC
 
-** Execution vs Total Time (Exp 1)
-   Comparison of pure computation time against total execution time for Experiment 1.
-   [[file:../plots/plot1a_execution_vs_total_exp1.pdf]]
+* Experiment 1: Asymptotic Behavior
+  Goal: Validate algorithmic behavior with high replication (100x) on moderate problem sizes ($24^3$ to $120^3$).
 
-* Execution vs Total Time (Exp 2)
-   Comparison of pure computation time against total execution time for Experiment 2, covering larger problem sizes.
-   [[file:../plots/plot1b_execution_vs_total_exp2.pdf]]
+* Execution Time (Exp 1)
+  Rigorous linearity confirms $O(n)$ complexity. Error bars are negligible due to high replicability.
+  [[file:../analysis/plots/plot1a_execution_vs_total_exp1.pdf]]
+
+* Overhead (Exp 1)
+  Significant relative overhead for small inputs. Computation time is insufficient to mask management costs.
+  [[file:../analysis/plots/plot5a_overhead_percent_exp1.pdf]]
+
+* Speedup (Exp 1)
+  Saturates early for small problems ($24^3$). Communication costs negate benefits of additional threads.
+  [[file:../analysis/plots/plot3a_cpu_speedup_exp1.pdf]]
+
+* Efficiency (Exp 1)
+  Sharp drops with increased threads highlight underutilization in fine-grained tasks.
+  [[file:../analysis/plots/plot4a_cpu_efficiency_exp1.pdf]]
 
 * Throughput (Exp 1)
-   Throughput analysis in MSamples/s for Experiment 1.
-   [[file:../plots/plot2a_throughput_exp1.pdf]]
+  Saturates early, limited by system overheads relative to the small workload.
+  [[file:../analysis/plots/plot2a_throughput_exp1.pdf]]
+
+* Experiment 2: Large Scale Scalability
+  Goal: Stress test with large problem sizes (up to $504^3$) to verify scalability and overhead dilution.
+
+* Execution Time (Exp 2)
+  Linear behavior $O(n)$ maintained under intense load. No degradation observed.
+  [[file:../analysis/plots/plot1b_execution_vs_total_exp2.pdf]]
+
+* Overhead (Exp 2)
+  Drastic reduction in relative overhead. Useful computation dominates execution.
+  [[file:../analysis/plots/plot5b_overhead_percent_exp2.pdf]]
+
+* Speedup (Exp 2)
+  Near-linear scaling. Resources effectively converted into performance due to better granularity.
+  [[file:../analysis/plots/plot3b_cpu_speedup_exp2.pdf]]
+
+* Efficiency (Exp 2)
+  High efficiency (>80%) retained even at 16 threads. Application is weakly scalable.
+  [[file:../analysis/plots/plot4b_cpu_efficiency_exp2.pdf]]
 
 * Throughput (Exp 2)
-   Throughput analysis in MSamples/s for Experiment 2.
-   [[file:../plots/plot2b_throughput_exp2.pdf]]
+  Maximum performance achieved by saturating FP units and masking memory latency.
+  [[file:../analysis/plots/plot2b_throughput_exp2.pdf]]
 
-* CPU Speedup (Exp 1)
-   Speedup achieved by increasing thread count in Experiment 1.
-   [[file:../plots/plot3a_cpu_speedup_exp1.pdf]]
+* Conclusion
 
-* CPU Speedup (Exp 2)
-   Speedup achieved by increasing thread count in Experiment 2. The scaling behavior is consistent with O(n) complexity.
-   [[file:../plots/plot3b_cpu_speedup_exp2.pdf]]
-
-* CPU Efficiency (Exp 1)
-   Efficiency of CPU resource utilization as thread count increases in Experiment 1.
-   [[file:../plots/plot4a_cpu_efficiency_exp1.pdf]]
-
-* CPU Efficiency (Exp 2)
-   Efficiency of CPU resource utilization in Experiment 2.
-   [[file:../plots/plot4b_cpu_efficiency_exp2.pdf]]
-
-* Overhead Analysis (Exp 1)
-   Percentage of overhead (Total Time - Computation Time) for Experiment 1.
-   [[file:../plots/plot5a_overhead_percent_exp1.pdf]]
-
-* Overhead Analysis (Exp 2)
-   Percentage of overhead for Experiment 2. Larger problem sizes generally reduce the relative impact of overhead.
-   [[file:../plots/plot5b_overhead_percent_exp2.pdf]]
+- *Robustness Verified:* Confirmed $O(n)$ complexity and predictable behavior across all scales.
+- *Overhead Dynamics:* High relative overhead on small inputs limits speedup, but is effectively diluted in larger workloads.
+- *High Scalability:* Achieved near-linear speedup and >80% efficiency on large problems, validating HPC readiness.
+- *Future Work:* Solid foundation established for distributed memory implementation (MPI).

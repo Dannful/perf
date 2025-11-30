@@ -139,12 +139,7 @@
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-  A clear and well-documented \LaTeX\ document is presented as an
-  article formatted for publication by ACM in a conference proceedings
-  or journal publication. Based on the ``acmart'' document class, this
-  article presents and explains many of the common variations, as well
-  as many of the formatting elements an author may use in the
-  preparation of the documentation of their work.
+  Este artigo apresenta uma análise de desempenho da aplicação Fletcher, focada na propagação de ondas sísmicas. O estudo avalia a escalabilidade e eficiência da aplicação em arquiteturas multi-core e aceleradores gráficos através de dois experimentos fatoriais. O primeiro experimento, com alta replicabilidade, validou o comportamento assintótico e a variância da aplicação. O segundo, focado em grandes volumes de dados, demonstrou a diluição do overhead de paralelismo. Os resultados confirmam a complexidade linear $O(n)$ e revelam que, embora a eficiência seja limitada em problemas pequenos devido a custos de sincronização, a aplicação atinge speedup quase linear e alta eficiência (>80\%) em cargas de trabalho intensivas, validando sua aptidão para Computação de Alto Desempenho (HPC).
 \end{abstract}
 
 %%
@@ -277,92 +272,111 @@ Outrossim, o $R^2$ calculado para a GPU é esperado: dado que a complexidade de 
 do paralelismo, o modelo de regressão dispõe de informações altamente limitadas para determinar como cada fator influencia a saída. Dessa forma, todos os fatores
 acabam por contribuir de maneira similarmente igual e tênue para os valores de saída, conferindo elevada incerteza para o modelo.
 
-A seguir, detalha-se a análise dos dados coletados através dos gráficos gerados, cobrindo tempo de execução, vazão, speedup, eficiência e overhead.
+A seguir, discutem-se os detalhes de cada etapa experimental, integrando as análises visuais à narrativa de desempenho da aplicação.
 
-\subsection{Tempo de Execução}
-A relação entre o tempo de execução e o tamanho total do problema (número de células na grade) é apresentada nas Figuras \ref{fig:exec_time_exp1} e \ref{fig:exec_time_exp2}. Os gráficos confirmam o comportamento linear ($O(n)$) esperado para o algoritmo Fletcher, tanto para o Experimento 1 quanto para o Experimento 2. O aumento nas dimensões do problema resulta em um crescimento proporcional do tempo de computação, validando a escalabilidade algorítmica da aplicação.
+\subsection{Experimento 1: Comportamento Assintótico e Variância}
 
-\begin{figure}[H]
+O foco inicial desta etapa foi validar o comportamento do algoritmo sob condições estatisticamente robustas (100 replicações), utilizando tamanhos de problema contidos ($24^3$ a $120^3$).
+
+A Figura \ref{fig:exec_time_exp1} corrobora a complexidade $O(n)$ da aplicação. A linearidade observada é rigorosa, e as barras de erro (ínfimas devido à alta replicabilidade) confirmam a estabilidade da implementação no ambiente de testes. O tempo de execução cresce de maneira previsível, sem desvios que indiquem anomalias no algoritmo.
+
+\begin{figure}[hbt!]
     \centering
-    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot1a_execution_vs_total_exp1.pdf}
-    \caption{Tempo de Execução vs. Tamanho Total do Problema: Experimento 1}
+    \includegraphics[width=\textwidth]{../analysis/plots/plot1a_execution_vs_total_exp1.pdf}
+    \caption{Tempo de Execução vs. Tamanho Total: Experimento 1. A linearidade confirma a complexidade $O(n)$.}
     \label{fig:exec_time_exp1}
 \end{figure}
 
-\begin{figure}[H]
+No entanto, a utilização de tamanhos de problema menores revela o custo relativo da gestão de paralelismo. Conforme observado na Figura \ref{fig:overhead_exp1}, a sobrecarga (overhead) percentual é significativamente alta para entradas pequenas. Nestes cenários, a granularidade da tarefa é fina demais, fazendo com que o tempo gasto criando e sincronizando \textit{threads} represente uma fração substancial do tempo total.
+
+\begin{figure}[hbt!]
     \centering
-    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot1b_execution_vs_total_exp2.pdf}
-    \caption{Tempo de Execução vs. Tamanho Total do Problema: Experimento 2}
-    \label{fig:exec_time_exp2}
-\end{figure}
-
-\subsection{Vazão (Throughput)}
-As Figuras \ref{fig:throughput_exp1} e \ref{fig:throughput_exp2} ilustram a vazão da aplicação em Milhões de Amostras por Segundo (MSamples/s). Observa-se que a vazão tende a aumentar e estabilizar com tamanhos de problema maiores, indicando um melhor aproveitamento dos recursos computacionais e amortização de custos fixos de inicialização. A comparação entre os experimentos evidencia a capacidade de processamento das diferentes arquiteturas testadas.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot2a_throughput_exp1.pdf}
-    \caption{Vazão (MSamples/s): Experimento 1}
-    \label{fig:throughput_exp1}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot2b_throughput_exp2.pdf}
-    \caption{Vazão (MSamples/s): Experimento 2}
-    \label{fig:throughput_exp2}
-\end{figure}
-
-\subsection{Speedup (CPU)}
-O speedup obtido com a paralelização em CPU é demonstrado nas Figuras \ref{fig:speedup_exp1} e \ref{fig:speedup_exp2}. O gráfico evidencia o ganho de desempenho ao aumentar o número de threads. Nota-se que o speedup se aproxima do ideal linear para contagens de threads mais baixas, mas apresenta rendimentos decrescentes ao se aproximar do limite de núcleos físicos ou devido à contenção de recursos de memória.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot3a_cpu_speedup_exp1.pdf}
-    \caption{Speedup em CPU: Experimento 1}
-    \label{fig:speedup_exp1}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot3b_cpu_speedup_exp2.pdf}
-    \caption{Speedup em CPU: Experimento 2}
-    \label{fig:speedup_exp2}
-\end{figure}
-
-\subsection{Eficiência (CPU)}
-As Figuras \ref{fig:efficiency_exp1} e \ref{fig:efficiency_exp2} apresentam a eficiência paralela. Conforme esperado, a eficiência tende a decrescer com o aumento do número de threads. Esta queda é atribuída à Lei de Amdahl, onde a fração serial do código e o overhead de gerenciamento de threads limitam a eficiência máxima atingível em altas contagens de processadores.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot4a_cpu_efficiency_exp1.pdf}
-    \caption{Eficiência em CPU: Experimento 1}
-    \label{fig:efficiency_exp1}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot4b_cpu_efficiency_exp2.pdf}
-    \caption{Eficiência em CPU: Experimento 2}
-    \label{fig:efficiency_exp2}
-\end{figure}
-
-\subsection{Sobrecarga (Overhead)}
-A sobrecarga percentual introduzida pelo paralelismo é mostrada nas Figuras \ref{fig:overhead_exp1} e \ref{fig:overhead_exp2}. O overhead é tipicamente maior para tamanhos de problema menores, onde o tempo de computação útil é insuficiente para mascarar os custos de criação e sincronização de threads. À medida que o tamanho do problema cresce, o overhead percentual tende a diminuir.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot5a_overhead_percent_exp1.pdf}
-    \caption{Sobrecarga Percentual: Experimento 1}
+    \includegraphics[width=\textwidth]{../analysis/plots/plot5a_overhead_percent_exp1.pdf}
+    \caption{Sobrecarga Percentual: Experimento 1. O impacto da gestão de threads é acentuado em cargas menores.}
     \label{fig:overhead_exp1}
 \end{figure}
 
-\begin{figure}[H]
+Este overhead impõe um teto ao ganho de desempenho. A Figura \ref{fig:speedup_exp1} demonstra que o Speedup se distancia do ideal linear à medida que o número de threads aumenta. Para os menores problemas ($24^3$), o ganho de velocidade estagna rapidamente, pois o custo de comunicação anula os benefícios de adicionar mais unidades de processamento.
+
+\begin{figure}[hbt!]
     \centering
-    \includegraphics[width=0.95\textwidth]{../analysis/plots/plot5b_overhead_percent_exp2.pdf}
-    \caption{Sobrecarga Percentual: Experimento 2}
+    \includegraphics[width=\textwidth]{../analysis/plots/plot3a_cpu_speedup_exp1.pdf}
+    \caption{Speedup em CPU: Experimento 1. Saturação precoce do ganho de velocidade em problemas pequenos.}
+    \label{fig:speedup_exp1}
+\end{figure}
+
+Consequentemente, a eficiência paralela sofre uma degradação acentuada. A Figura \ref{fig:efficiency_exp1} ilustra como a eficiência cai drasticamente para problemas pequenos ao utilizar muitas threads. Isso evidencia que, para esta escala de dados, a aplicação é subutilizada em arquiteturas com muitos núcleos.
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot4a_cpu_efficiency_exp1.pdf}
+    \caption{Eficiência em CPU: Experimento 1. Queda de eficiência devido à Lei de Amdahl e overhead fixo.}
+    \label{fig:efficiency_exp1}
+\end{figure}
+
+A métrica final de desempenho bruto, a vazão (throughput), é apresentada na Figura \ref{fig:throughput_exp1}. Observa-se que, embora a vazão aumente com o tamanho do problema, ela tende a estabilizar, sugerindo que gargalos de memória ou overheads de sistema impedem um crescimento contínuo nesta escala de teste.
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot2a_throughput_exp1.pdf}
+    \caption{Vazão (MSamples/s): Experimento 1. Estabilização do throughput.}
+    \label{fig:throughput_exp1}
+\end{figure}
+
+\subsection{Experimento 2: Escalabilidade em Larga Escala}
+
+Com base na estabilidade verificada anteriormente, o Experimento 2 estressou a arquitetura com volumes de dados significativamente maiores (até $504^3$). A Figura \ref{fig:exec_time_exp2} demonstra que, mesmo sob carga intensa e com menos replicações, a aplicação mantém seu comportamento linear previsível, sem apresentar degradação de performance por \textit{thrashing} de cache ou memória virtual.
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot1b_execution_vs_total_exp2.pdf}
+    \caption{Tempo de Execução vs. Tamanho Total: Experimento 2. Linearidade mantida em escalas maiores.}
+    \label{fig:exec_time_exp2}
+\end{figure}
+
+O principal benefício do aumento da carga de trabalho é a diluição dos custos fixos de paralelismo. Ao comparar a Figura \ref{fig:overhead_exp2} com o experimento anterior, nota-se uma queda drástica na sobrecarga percentual. O tempo de computação útil domina a execução, tornando o custo de gerenciamento de threads virtualmente negligenciável para os maiores problemas.
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot5b_overhead_percent_exp2.pdf}
+    \caption{Sobrecarga Percentual: Experimento 2. Diluição significativa do overhead.}
     \label{fig:overhead_exp2}
 \end{figure}
+
+Com o overhead controlado, a escalabilidade da aplicação melhora substancialmente. A Figura \ref{fig:speedup_exp2} mostra curvas de Speedup muito mais próximas do ideal linear, indicando que a adição de recursos computacionais está sendo efetivamente convertida em desempenho.
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot3b_cpu_speedup_exp2.pdf}
+    \caption{Speedup em CPU: Experimento 2. Escalabilidade superior devido à maior granularidade.}
+    \label{fig:speedup_exp2}
+\end{figure}
+
+Da mesma forma, a eficiência paralela é preservada. A Figura \ref{fig:efficiency_exp2} evidencia que, para grandes volumes de dados, a eficiência permanece elevada (acima de 80\% em muitos casos) mesmo com 16 threads. Isso confirma que a aplicação Fletcher é "fracamente escalável" (weak scaling), beneficiando-se do aumento do tamanho do problema proporcionalmente aos recursos.
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot4b_cpu_efficiency_exp2.pdf}
+    \caption{Eficiência em CPU: Experimento 2. Alta eficiência mantida em cargas elevadas.}
+    \label{fig:efficiency_exp2}
+\end{figure}
+
+Por fim, a vazão atinge seus valores máximos no Experimento 2. A Figura \ref{fig:throughput_exp2} mostra que, ao alimentar a CPU com dados suficientes para saturar as unidades de ponto flutuante e mascarar latências de memória, a aplicação atinge um patamar de performance significativamente superior ao observado no primeiro experimento.
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot2b_throughput_exp2.pdf}
+    \caption{Vazão (MSamples/s): Experimento 2. Máximo desempenho obtido com saturação de recursos.}
+    \label{fig:throughput_exp2}
+\end{figure}
+
+\section{Conclusão}
+
+A análise de desempenho conduzida sobre a aplicação Fletcher permitiu uma caracterização detalhada de seu comportamento em diferentes escalas de processamento. Os experimentos confirmaram rigorosamente a complexidade linear $O(n)$ do algoritmo, demonstrando estabilidade e previsibilidade tanto em CPU quanto em GPU.
+
+A distinção entre os dois projetos experimentais foi crucial para identificar os limites da implementação. Enquanto o primeiro experimento evidenciou o impacto significativo do overhead de gerenciamento de threads em volumes de dados menores, o segundo comprovou a excelente escalabilidade da aplicação quando submetida a cargas de trabalho adequadas. A capacidade de manter a eficiência acima de 80\% com 16 threads em grandes problemas indica que a aplicação é "fracamente escalável" e se beneficia diretamente do aumento da granularidade da tarefa.
+
+Conclui-se que a aplicação Fletcher está bem otimizada para execução intra-nó em arquiteturas modernas. Os resultados obtidos fornecem uma base sólida para o desenvolvimento futuro de uma versão distribuída utilizando MPI, visto que o gargalo de computação local foi minimizado e o comportamento da aplicação é agora bem compreendido.
 
 %%
 %% The next two lines define the bibliography style to be used, and
