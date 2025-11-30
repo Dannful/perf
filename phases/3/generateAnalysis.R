@@ -175,7 +175,7 @@ experiment_results_clean <- read.csv("./clean_dataset.csv") |>
             TRUE ~ machine
         ),
         metric_label = case_when(
-            metric_name == "computation_time_s" ~ "Tempo de Execução",
+            metric_name == "computation_time_s" ~ "Tempo de Computação",
             metric_name == "total_time_s" ~ "Tempo Total",
             TRUE ~ metric_name
         )
@@ -211,14 +211,14 @@ plot_time_analysis <- function(data, exp) {
     facet_grid(device ~ num_iterations, 
                labeller = labeller(device = c(cpu = "CPU", gpu = "GPU"))) +
     labs(
-        title = paste("Experimento", exp, ": Tempo de execução vs Tempo total"),
+        title = paste("Experimento", exp, ": Tempo de computação vs Tempo total"),
         x = "Tamanho do problema",
         y = "Tempo (escala logarítmica)",
         color = "Máquina / Configuração",
         linetype = "Métrica"
     ) +
     my_style() +
-    scale_linetype_manual(values = c("Tempo de Execução" = "solid", "Tempo Total" = "dashed")) +
+    scale_linetype_manual(values = c("Tempo de Computação" = "solid", "Tempo Total" = "dashed")) +
     scale_x_continuous(breaks = seq(0, 500, 50))
 }
 
@@ -439,19 +439,13 @@ overhead_df <- experiment_results_clean |>
     tidyr::pivot_wider(
         names_from = metric_name,
         values_from = value,
-        id_cols = c(experiment, device, machine, num_threads, problem_size, num_iterations, replication_index)
+        id_cols = c(experiment, device, machine, machine_label, num_threads, problem_size, num_iterations, replication_index)
     ) |>
     mutate(
         overhead_pct = 100 * (total_time_s - computation_time_s) / total_time_s,
-        machine_label = case_when(
-            machine == "draco2" ~ paste0("draco2 (CPU, ", num_threads, " cores)"),
-            machine == "draco1" ~ "draco1 (GPU)",
-            machine == "beagle" ~ "beagle (GPU)",
-            TRUE ~ machine
-        )
     ) |>
     filter(overhead_pct >= 0) |>
-    group_by(experiment, machine_label, problem_size, num_iterations) |>
+    group_by(experiment, machine_label, num_threads, problem_size, num_iterations) |>
     summarise(
         mean_overhead = mean(overhead_pct),
         sd_overhead = sd(overhead_pct),
