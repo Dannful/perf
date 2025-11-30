@@ -442,26 +442,32 @@ overhead_df <- experiment_results_clean |>
         id_cols = c(experiment, device, machine, machine_label, num_threads, problem_size, num_iterations, replication_index)
     ) |>
     mutate(
+        overhead_abs = total_time_s - computation_time_s,
         overhead_pct = 100 * (total_time_s - computation_time_s) / total_time_s,
     ) |>
     filter(overhead_pct >= 0) |>
     group_by(experiment, machine_label, num_threads, problem_size, num_iterations) |>
     summarise(
-        mean_overhead = mean(overhead_pct),
-        sd_overhead = sd(overhead_pct),
+        mean_overhead_abs = mean(overhead_abs),
+        sd_overhead_abs   = sd(overhead_abs),
+        mean_overhead_pct = mean(overhead_pct),
+        sd_overhead_pct = sd(overhead_pct),
         n = n(),
         .groups = "drop"
     ) |>
     mutate(
-        se = sd_overhead / sqrt(n),
         t_crit = qt(0.995, df = n - 1),
-        ci_lower = mean_overhead - (t_crit * se),
-        ci_upper = mean_overhead + (t_crit * se)
+        se = sd_overhead_pct / sqrt(n),
+        ci_lower_pct = mean_overhead_pct - (t_crit * se),
+        ci_upper_pct = mean_overhead_pct + (t_crit * se),
+        se_abs = sd_overhead_abs / sqrt(n),
+        ci_lower_abs = mean_overhead_abs - (t_crit * se_abs),
+        ci_upper_abs = mean_overhead_abs + (t_crit * se_abs)
     )
 
-plot_experiment_io <- function(data, exp) {
-    ggplot(data |> filter(experiment == exp), aes(x = problem_size, y = mean_overhead, color = machine_label)) +
-    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), 
+plot_overhead_pct <- function(data, exp) {
+    ggplot(data |> filter(experiment == exp), aes(x = problem_size, y = mean_overhead_pct, color = machine_label)) +
+    geom_errorbar(aes(ymin = ci_lower_pct, ymax = ci_upper_pct), 
                   width = 5, linewidth = 0.5, alpha = 0.8) +
     geom_point(size = 2) +
     geom_line(linewidth = 1.2) +
@@ -488,8 +494,32 @@ plot_experiment_io <- function(data, exp) {
     )
 }
 
-p_overhead1 <- plot_experiment_io(overhead_df, 1)
-p_overhead2 <- plot_experiment_io(overhead_df, 2)
+plot_overhead_abs <- function(data, exp) {
+    ggplot(data |> filter(experiment == exp),
+         aes(x = problem_size, y = mean_overhead_abs, color = machine_label)) +
+    geom_errorbar(aes(ymin = ci_lower_abs, ymax = ci_upper_abs),
+                  width = 5, linewidth = 0.5, alpha = 0.8) +
+    geom_point(size = 2) +
+    geom_line(linewidth = 1.2) +
+    facet_grid(~ num_iterations, scales = "free_x") +
+    labs(
+        title = "Overhead vs Tamanho do Problema",
+        y = "Overhead (segundos)",
+        x = "Tamanho do Problema",
+        color = "Máquina / Configuração"
+    ) +
+    my_style() +
+    theme(legend.position = "bottom")
+}
 
-ggsave("plots/plot5_io_overhead_analysis_exp1.pdf", plot = p_overhead1, width = 10, height = 6)
-ggsave("plots/plot5_io_overhead_analysis_exp2.pdf", plot = p_overhead2, width = 10, height = 6)
+p_overhead1 <- plot_overhead_pct(overhead_df, 1)
+p_overhead2 <- plot_overhead_pct(overhead_df, 2)
+
+ggsave("plots/plot5a_overhead_percent_exp1.pdf", plot = p_overhead1, width = 10, height = 6)
+ggsave("plots/plot5b_overhead_percent_exp2.pdf", plot = p_overhead2, width = 10, height = 6)
+
+p_overhead_abs1 <- plot_overhead_abs(overhead_df, 1)
+p_overhead_abs2 <- plot_overhead_abs(overhead_df, 2)
+
+ggsave("plots/plot6a_overhead_absolute_exp1.pdf", plot = p_overhead_abs1, width = 10, height = 6)
+ggsave("plots/plot6b_overhead_absolute_exp2.pdf", plot = p_overhead_abs2, width = 10, height = 6)
