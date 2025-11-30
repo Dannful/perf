@@ -95,7 +95,7 @@ All experiments were executed at PCAD (https://gppd-hpc.inf.ufrgs.br), utilizing
   Goal: Validate algorithmic behavior with high replication (100x) on moderate problem sizes ($24^3$ to $120^3$).
 
 * Execution Time (Exp 1)
-  Rigorous linearity confirms $O(n)$ complexity. Error bars are negligible due to high replicability.
+  Computation (solid) is strictly linear. Total time (dashed) diverges due to disk I/O scaling with problem size/iterations.
   [[file:../analysis/plots/plot1a_execution_vs_total_exp1.pdf]]
 
 * Overhead (Exp 1)
@@ -118,7 +118,7 @@ All experiments were executed at PCAD (https://gppd-hpc.inf.ufrgs.br), utilizing
   Goal: Stress test with large problem sizes (up to $504^3$) to verify scalability and overhead dilution.
 
 * Execution Time (Exp 2)
-  Linear behavior $O(n)$ maintained under intense load. No degradation observed.
+  Linear behavior maintained. Total Time slope increases reflecting the massive file writes required for larger grids.
   [[file:../analysis/plots/plot1b_execution_vs_total_exp2.pdf]]
 
 * Overhead (Exp 2)
