@@ -1,0 +1,286 @@
+%%
+%% This is file `sample-acmsmall.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `all,journal,bibtex,acmsmall')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-acmsmall.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%%
+%% Commands for TeXCount
+%TC:macro \cite [option:text,text]
+%TC:macro \citep [option:text,text]
+%TC:macro \citet [option:text,text]
+%TC:envir table 0 1
+%TC:envir table* 0 1
+%TC:envir tabular [ignore] word
+%TC:envir displaymath 0 word
+%TC:envir math 0 word
+%TC:envir comment 0 0
+%%
+%% The first command in your LaTeX source must be the \documentclass
+%% command.
+%%
+%% For submission and review of your manuscript please change the
+%% command to \documentclass[manuscript, screen, review]{acmart}.
+%%
+%% When submitting camera ready or to TAPS, please change the command
+%% to \documentclass[sigconf]{acmart} or whichever template is required
+%% for your publication.
+%%
+%%
+\documentclass[acmsmall]{acmart}
+\usepackage{makecell}
+\usepackage[brazil]{babel}
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+\setcopyright{acmlicensed}
+\copyrightyear{2025}
+\acmYear{2025}
+
+%%
+%% These commands are for a JOURNAL article.
+\acmJournal{JACM}
+\acmVolume{37}
+\acmNumber{4}
+\acmArticle{111}
+\acmMonth{11}
+
+%%
+%% Submission ID.
+%% Use this when submitting an article to a sponsored event. You'll
+%% receive a unique submission ID from the organizers
+%% of the event, and this ID should be used as the parameter to this command.
+%%\acmSubmissionID{123-A56-BU3}
+
+%%
+%% For managing citations, it is recommended to use bibliography
+%% files in BibTeX format.
+%%
+%% You can then either use BibTeX with the ACM-Reference-Format style,
+%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
+%% support for advanced citation of software artefact from the
+%% biblatex-software package, also separately available on CTAN.
+%%
+%% Look at the sample-*-biblatex.tex files for templates showcasing
+%% the biblatex styles.
+%%
+
+%%
+%% The majority of ACM publications use numbered citations and
+%% references.  The command \citestyle{authoryear} switches to the
+%% "author year" style.
+%%
+%% If you are preparing content for an event
+%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
+%% citations and references.
+%% Uncommenting
+%% the next command will enable that style.
+%%\citestyle{acmauthoryear}
+
+
+%%
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+%%
+%% The "title" command has an optional parameter,
+%% allowing the author to define a "short title" to be used in page headers.
+\title[Análise: Fletcher]{Análise de uma aplicação de propagação de ondas sísmicas: Fletcher}
+
+%%
+%% The "author" command and its associated commands are used to define
+%% the authors and their affiliations.
+%% Of note is the shared affiliation of the first two authors, and the
+%% "authornote" and "authornotemark" commands
+%% used to denote shared contribution to the research.
+\author{Francisco Pegoraro Etcheverria}
+\author{Pedro Colle}
+\author{Vinícius Daniel Spadotto}
+\affiliation{%
+  \institution{Universidade Federal do Rio Grande do Sul}
+  \city{Porto Alegre}
+  \state{Rio Grande do Sul}
+  \country{Brasil}
+}
+
+%% By default, the full list of authors will be used in the page
+%% headers. Often, this list is too long, and will overlap
+%% other information printed in the page headers. This command allows
+%% the author to define a more concise list
+%% of authors' names for this purpose.
+\renewcommand{\shortauthors}{Etcheverria et al.}
+
+%%
+%% The abstract is a short summary of the work to be presented in the
+%% article.
+\begin{abstract}
+  A clear and well-documented \LaTeX\ document is presented as an
+  article formatted for publication by ACM in a conference proceedings
+  or journal publication. Based on the ``acmart'' document class, this
+  article presents and explains many of the common variations, as well
+  as many of the formatting elements an author may use in the
+  preparation of the documentation of their work.
+\end{abstract}
+
+%%
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+\keywords{Onda, Sísmica, Propagação, Perturbação, Fletcher}
+
+\received{30 November 2025}
+\received[revised]{30 November 2025}
+\received[accepted]{30 November 2025}
+
+%%
+%% This command processes the author and affiliation and title
+%% information and builds the first part of the formatted document.
+\maketitle
+
+\section{Introduction}
+
+
+\section{Trabalhos relacionados}
+\section{Metodologia}
+
+A metodologia empregada para a realização do presente trabalho deu-se mediante
+a execução de experimentos com fatores pré-definidos e sob condições de execução estabelecidas e
+devidamente controladas para atingir os objetivos estipulados.
+
+\subsection{Objetivos}
+
+Visou-se a configurar um ambiente suficientemente controlado para a observação do comportamento da aplicação,
+focando em como os fatores definidos para a execução impactam nas saídas capturadas. Definiu-se, pois, como objetivo a
+obtenção dos dados brutos e a subsequente utilização destes para a construção de um modelo de regressão linear que apropriadamente
+relacionasse os fatores à saída---esta dada em \textit{MSamples/s}---devidamente fundamentada por um teste de hipótese adequado.
+
+\subsection{Projetos experimentais}
+
+Foram realizados \textbf{2} projetos experimentais \textit{full factorial} de múltiplos fatores em sequência, tendo o último sido baseado nas observações
+advindas da execucação do primeiro.
+
+Cada projeto foi dividido em dois conjuntos de experimentos distintos: \textbf{CPU} e \textbf{GPU}.
+
+\begin{table}[H]
+  \caption{Projetos experimentais para CPU}
+  \label{tab:projexpcpu}
+  \begin{tabular}{ccccc}
+    \toprule
+    Projeto experimental&Dimensões do dado de entrada&N\textdegree de iterações&N\textdegree de \textit{threads}&Replicações\\
+    \midrule
+    1 & $24^3$, $56^3$, $120^3$ & $10$, $100$, $1000$ & $1$, $2$, $4$, $8$, $16$ & 100\\
+    2 & $24^3$, $88^3$, $152^3$, $248^3$, $376^3$, $504^3$ & $25$ & $1$, $2$, $4$, $8$, $16$ & 10\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \caption{Projetos experimentais para GPU}
+  \label{tab:projexpgpu}
+  \begin{tabular}{cccc}
+    \toprule
+    Projeto experimental&Dimensões do dado de entrada&N\textdegree de iterações&Replicações\\
+    \midrule
+    1 & $24^3$, $56^3$, $120^3$ & $10$, $100$, $1000$ & 100\\
+    2 & $24^3$, $88^3$, $152^3$, $248^3$, $376^3$, $504^3$ & $25$ & 10\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Ambiente de execução}
+
+Todos os experimentos foram executados no PCAD, https://gppd-hpc.inf.ufrgs.br, no INF/UFRGS, utilizando
+as máquinas \textbf{draco} e \textbf{beagle}.
+
+\begin{table}[H]
+  \caption{Máquinas utilizadas para os experimentos}
+  \label{tab:macexpcpu}
+  \begin{tabular}{ccc}
+    \toprule
+    Projeto experimental&Experimento&Máquina\\
+    \midrule
+    1 & CPU & draco2\\
+    1 & GPU & draco1\\
+    2 & CPU & draco2\\
+    2 & GPU & draco1\\
+    2 & GPU & beagle\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \caption{Especificações técnicas das máquinas utilizadas}
+  \label{tab:macspec}
+  \begin{tabular}{cccccc}
+    \toprule
+    Máquina&CPU&RAM&Acelerador&Disco\\
+    \midrule
+    draco[1,2] & \makecell{2 x Intel(R) Xeon(R) \\ E5-2640 v2, 2.00 GHz, \\ 32 threads, 16 cores} & 64 GB DDR3 & \makecell{NVIDIA Tesla K20m} & 1.8 TB HDD\\
+    \hline
+    beagle & \makecell{2 x Intel(R) Xeon(R) \\ E5-2650, 2.00 GHz, \\ 32 threads, 16 cores} & 32 GB DDR3 & \makecell{2 x NVIDIA GeForce GTX 1080 Ti} & 931 GB HDD\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Resultados}
+
+Após a execução do primeiro projeto experimental, observou-se a possibilidade de realizar um novo projeto,
+almejando um tamanho de problema de entrada maior, porém com uma quantidade menor de iterações. Conforme
+as tabelas \ref{tab:projexpcpu} e \ref{tab:projexpgpu}, a primeira bateria experimental confere uma variabilidade menor
+às observações, em virtude da maior quantidade de replicações para cada execução. Entretanto, a maior diversidade de tamanho
+de problema de entrada permite a identificação mais precisa da influência de tal fator na métrica de saída (\textit{MSamples/s}).
+
+Os projetos experimentais supracitados permitiram a obtenção de um $R^2 \approx 0.9898$ para os experimentos de \textbf{CPU} e um
+$R^2 \approx 0.68$ para \textbf{GPU}.
+
+Embora a métrica $R^2$ para CPU seja satisfatória, o modelo revelou que o fator de maior contribuição para a métrica de saída é o
+\textbf{número de threads}, sendo a razão para tal imediata: a complexidade de cálculo associada ao tamanho do problema manteve-se
+similar em sua ordem de grandeza, implicando a situação supracitada, porquanto a aplicação comporta-se conforme $O(n)$ em relação às dimensões do dado
+de entrada. A quantidade de iterações, por sua vez, embora tenha variado razoavelmente em sua magnitude, depende intrinsicamente da complexidade de cálculo
+associada, levando, pois, à sua tênue contribuição para os valores observados.
+
+Outrossim, o $R^2$ calculado para a GPU é esperado: dado que a complexidade de cálculo torna-se substancialmente menor em virtude da maior exploração
+do paralelismo, o modelo de regressão dispõe de informações altamente limitadas para determinar como cada fator influencia a saída. Dessa forma, todos os fatores
+acabam por contribuir de maneira similarmente igual e tênue para os valores de saída, conferindo elevada incerteza para o modelo.
+
+%%
+%% The acknowledgments section is defined using the "acks" environment
+%% (and NOT an unnumbered section). This ensures the proper
+%% identification of the section in the article metadata, and the
+%% consistent spelling of the heading.
+\begin{acks}
+To Robert, for the bagels and explaining CMYK and color spaces.
+\end{acks}
+
+%%
+%% The next two lines define the bibliography style to be used, and
+%% the bibliography file.
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{report}
+
+\end{document}
+\endinput
