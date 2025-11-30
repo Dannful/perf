@@ -67,11 +67,15 @@ plot_time_analysis <- function(data, exp) {
                   width = 5, alpha = 1.0, linewidth = 0.5) +
     geom_line(linewidth = 0.8) +
     geom_point(size = 2.5) +
-    facet_wrap(vars(device, num_iterations), 
-               scales = "free_y", 
-               ncol = 3, 
-               labeller = labeller(device = c("cpu" = "CPU","gpu" = "GPU") , 
-                    num_iterations = function(x) { paste0("Iterações: ", x) })) +
+    facet_grid(
+        rows = vars(device),
+        cols = vars(num_iterations),
+        scales = "free_y",
+        labeller = labeller(
+            device = c(cpu = "CPU", gpu = "GPU"),
+            num_iterations = function(x) paste0("Iterações: ", x)
+        )
+    ) +
     labs(
         title = paste("Experimento", exp, ": Tempo de computação vs Tempo total"),
         x = "Tamanho do problema",
@@ -106,25 +110,25 @@ throughput_summary <- experiment_results_clean |>
   )
 
 plot_throughput <- function(data, exp) {
-  ggplot(throughput_summary |> filter(experiment == exp), 
-              aes(x = problem_size, 
-                  y = mean_value, 
-                  color = machine_label, 
-                  group = machine_label)) +
-  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), 
-                width = 5, alpha = 1.0, linewidth = 0.5) +
-  geom_line(linewidth = 0.8) +
-  geom_point(size = 2.5) +
-  
-  facet_wrap(~ num_iterations, labeller = label_value) +
-  
-  labs(
-    title = paste("Experimento", exp, ": Throughput"),
-    x = "Tamanho do problema",
-    y = "Throughput (MSamples/s)",
-    color = "Máquina / Configuração"
-  ) +
-  my_style()
+    ggplot(throughput_summary |> filter(experiment == exp), 
+                aes(x = problem_size, 
+                    y = mean_value, 
+                    color = machine_label, 
+                    group = machine_label)) +
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), 
+                  width = 5, alpha = 1.0, linewidth = 0.5) +
+    geom_line(linewidth = 0.8) +
+    geom_point(size = 2.5) +
+    facet_wrap(~ num_iterations, labeller = 
+        labeller(num_iterations = function(x) paste0("Iterações: ", x))
+    ) +
+    labs(
+      title = paste("Experimento", exp, ": Throughput"),
+      x = "Tamanho do problema",
+      y = "Throughput (MSamples/s)",
+      color = "Máquina / Configuração"
+    ) +
+    my_style()
 }
 
 p2a <- plot_throughput(throughput_summary, exp = 1)
@@ -188,7 +192,9 @@ plot_cpu_speedup <- function(data, exp) {
               linetype = "dashed", 
               color = "gray50", 
               linewidth = 0.8) +
-    facet_wrap(~ num_iterations, labeller = label_value) +
+    facet_wrap(~ num_iterations, labeller = 
+        labeller(num_iterations = function(x) paste0("Iterações: ", x))
+    ) +
     scale_x_continuous(
       breaks = sort(unique(data$num_threads))
     ) +
@@ -236,7 +242,9 @@ plot_cpu_efficiency <- function(data, exp) {
               color = "gray50", 
               linewidth = 0.8) +
       
-    facet_wrap(~ num_iterations, labeller = label_value) +
+    facet_wrap(~ num_iterations, labeller = 
+        labeller(num_iterations = function(x) paste0("Iterações: ", x))
+    ) +
     
     scale_x_continuous(
       breaks = sort(unique(data$num_threads))
@@ -324,8 +332,9 @@ plot_overhead_pct <- function(data, exp) {
     geom_point(size = 2) +
     geom_line(linewidth = 1.2) +
 
-    facet_grid( ~ num_iterations, scales = "free_x") +
-    
+    facet_grid( ~ num_iterations, scales = "free_x", labeller = 
+        labeller(num_iterations = function(x) paste0("Iterações: ", x))
+    ) +     
     geom_hline(yintercept = c(10, 25, 50), linetype = "dotted", color = "gray50", alpha = 0.8) +
     annotate("text", x = min(data$problem_size), y = 52, label = "50% Overhead", 
              color = "gray50", size = 3, hjust = 0, vjust = 0) +
