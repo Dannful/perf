@@ -58,7 +58,8 @@ time_summary <- experiment_results_clean |>
     )
 
 plot_time_analysis <- function(data, exp) {
-    ggplot(time_summary |> filter(experiment == exp) |> filter(!is.na(mean_value)), 
+    df <- data |> filter(experiment == exp) |> filter(!is.na(mean_value))
+    p <- ggplot(df, 
         aes(x = problem_size, y = mean_value, 
             color = machine_label, 
             linetype = metric_label,
@@ -67,14 +68,6 @@ plot_time_analysis <- function(data, exp) {
                   width = 5, alpha = 1.0, linewidth = 0.5) +
     geom_line(linewidth = 0.8) +
     geom_point(size = 2.5) +
-    facet_wrap(
-        ~ device + num_iterations,
-        scales = "free_y",
-        labeller = labeller(
-             device = c(cpu = "CPU", gpu = "GPU"),
-             num_iterations = function(x) paste0("Iterações: ", x)
-        )
-    ) + 
     labs(
         x = "Tamanho do problema",
         y = "Tempo (s)",
@@ -84,6 +77,29 @@ plot_time_analysis <- function(data, exp) {
     my_style() +
     scale_linetype_manual(values = c("Tempo de Computação" = "solid", "Tempo Total" = "dashed")) +
     scale_x_continuous(breaks = seq(0, 500, 50))
+
+    if (length(unique(df$num_iterations)) > 1) {
+        p <- p + facet_wrap(
+            ~ device + num_iterations,
+            scales = "free_y",
+            labeller = labeller(
+                device = c(cpu = "CPU", gpu = "GPU"),
+                num_iterations = function(x) paste0("Iterações: ", x)
+            )
+        )
+    } else {
+        p <- p + facet_grid(
+            rows = vars(device),
+            cols = vars(num_iterations),
+            scales = "free_y",
+            labeller = labeller(
+                device = c(cpu = "CPU", gpu = "GPU"),
+                num_iterations = function(x) paste0("Iterações: ", x)
+            )
+        )
+    }
+
+    return (p)
 }
 
 p1a <- plot_time_analysis(time_summary, exp = 1)
@@ -108,11 +124,11 @@ throughput_summary <- experiment_results_clean |>
   )
 
 plot_throughput <- function(data, exp) {
-    ggplot(throughput_summary |> filter(experiment == exp), 
-                aes(x = problem_size, 
-                    y = mean_value, 
-                    color = machine_label, 
-                    group = machine_label)) +
+    ggplot(data |> filter(experiment == exp), 
+        aes(x = problem_size, 
+            y = mean_value, 
+            color = machine_label, 
+            group = machine_label)) +
     geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), 
                   width = 5, alpha = 1.0, linewidth = 0.5) +
     geom_line(linewidth = 0.8) +
@@ -268,37 +284,6 @@ p_efficiency2 <- plot_cpu_efficiency(cpu_speedup, 2)
 
 ggsave(file.path(plots_dir, "plot4a_cpu_efficiency_exp1.pdf"), plot = p_efficiency1, width = 8, height = 5)
 ggsave(file.path(plots_dir, "plot4b_cpu_efficiency_exp2.pdf"), plot = p_efficiency2, width = 8, height = 5)
-
-plot_cpu_vs_gpu_speedup <- function(data, exp) {
-    ggplot(data |> filter(experiment == exp),
-         aes(x = num_threads,
-             y = speedup,
-             color = factor(problem_size),
-             linetype = metric_label,
-             shape = metric_label,
-             group = interaction(problem_size, metric_label))) +
-    geom_line(linewidth = 0.9) +
-    geom_point(size = 2.5) +
-    geom_line(data = ideal_line, 
-              aes(x = num_threads, y = speedup), 
-              inherit.aes = FALSE, 
-              linetype = "dashed", 
-              color = "gray50", 
-              linewidth = 0.8) +
-    facet_wrap(~ num_iterations, labeller = label_value) +
-    scale_x_continuous(
-      breaks = sort(unique(data$num_threads))
-    ) +
-    scale_shape_manual(values = c(16, 4)) +
-    labs(
-      x = "Número de Threads",
-      y = "Speedup (baseline = 1 thread)",
-      color = "Tamanho do problema",
-      linetype = "Métrica",  
-      shape = "Métrica"
-    ) +
-    my_style()
-}
 
 # =============================================================================================== #
 # Overhead analysis
