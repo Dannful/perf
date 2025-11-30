@@ -3,6 +3,7 @@ library(dplyr)
 library(grid)
 library(purrr)
 library(tidyr)
+library(here)
 
 my_style <- function() {
   list(
@@ -19,153 +20,15 @@ my_style <- function() {
     ))
 }
 
-experiment_results_clean <- read.csv("./clean_dataset.csv") |>
-    filter(experiment == 1, machine %in% c("draco1", "draco2"))
+base_dir <- here::here("phases/3/analysis")
+plots_dir <- file.path(base_dir, "plots")
+dir.create(plots_dir, showWarnings = FALSE, recursive = TRUE)
 
-cpu_data <- experiment_results_clean |>
-    filter(device == "cpu", metric_name == "computation_time_s")
+# =============================================================================================== #
+# Total and execution time analysis 
+# =============================================================================================== #
 
-cpu_baseline <- cpu_data |>
-    filter(num_threads == 1) |>
-    group_by(problem_size, num_iterations) |>
-    summarise(baseline_time = mean(value), .groups = "drop")
-
-cpu_speedup <- cpu_data |>
-    filter(num_threads > 1) |>
-    left_join(cpu_baseline, by = c("problem_size", "num_iterations")) |>
-    mutate(speedup = baseline_time/value)
-
-gpu_data <- experiment_results_clean |>
-    filter(device == "gpu", metric_name == "computation_time_s")
-
-if (nrow(gpu_data) > 0 && nrow(cpu_baseline) > 0) {
-    gpu_speedup <- gpu_data |>
-        left_join(cpu_baseline, by = c("problem_size", "num_iterations")) |>
-        mutate(speedup = baseline_time/value)
-} else {
-    gpu_speedup <- tibble()
-}
-
-pdf("analysis_plots.pdf", width = 10, height = 8)
-
-p1 <- ggplot(filter(experiment_results_clean, metric_name == "computation_time_s"),
-    aes(x = problem_size, y = value, color = as.factor(num_threads))) + 
-    geom_point(alpha = 0.8) +
-    geom_line(alpha = 0.8) + 
-    facet_grid(num_iterations ~ device) + 
-    labs(title = "Computation Time vs Problem Size",
-         x = "Problem Size", 
-         y = "Computation Time (seconds)", 
-         color = "Number of Threads") +
-    my_style()
-print(p1)
-
-# Plot 2: CPU Thread Speedup
-if (nrow(cpu_speedup) > 0) {
-    p2 <- ggplot(cpu_speedup, aes(x = num_threads, y = speedup, color = as.factor(problem_size))) +
-        geom_point() + 
-        geom_line() + 
-        geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
-        facet_wrap(~problem_size, scales = "free_y") + 
-        labs(title = "CPU Thread Speedup",
-             x = "Number of Threads", 
-             y = "Speedup Factor", 
-             color = "Problem Size") +
-        my_style() + 
-        theme(legend.position = "none")
-    print(p2)
-}
-
-# Plot 3: Linear Model
-lm_data <- experiment_results_clean |>
-    filter(device == "cpu", metric_name == "msamples_per_sec")
-
-if (nrow(lm_data) > 0) {
-    model <- lm(value ~ num_threads + problem_size + num_iterations, data = lm_data)
-
-    cat("\n--- Linear Model Summary ---\n")
-    print(summary(model))
-
-    lm_data_long <- lm_data |>
-        mutate(predicted = predict(model)) |>
-        tidyr::pivot_longer(cols = c("value", "predicted"), 
-                           names_to = "type", 
-                           values_to = "msamples_per_sec")
-
-    p_lm1 <- ggplot(lm_data_long, aes(x = num_threads, y = msamples_per_sec, color = type)) +
-        geom_point(alpha = 0.6) + 
-        geom_line(aes(group = type), alpha = 0.6) + 
-        facet_grid(problem_size ~ num_iterations, scales = "free_y") + 
-        labs(x = "Number of Threads", 
-             y = "Performance (MSamples/s)",
-             color = "Type") + 
-        my_style()
-
-    grid.newpage()
-    pushViewport(viewport(layout = grid.layout(2, 1, heights = unit(c(0.1, 0.9), "npc"))))
-    grid.text("Linear Model Diagnostics: Actual vs. Predicted", 
-              gp = gpar(fontsize = 16),
-              vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-    print(p_lm1, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-}
-
-dev.off()
-
-print("Analysis complete. Plots saved to analysis_plots.pdf")
-
-
-# --- 99% CONFIDENCE INTERVALS FOR GPU ---
-
-compute_ci <- function(x, conf = 0.99) {
-    n <- length(x)
-    mean_x <- mean(x)
-    se <- sd(x)/sqrt(n)
-    alpha <- 1 - conf
-    tcrit <- qt(1 - alpha/2, df = n - 1)
-
-    tibble(mean = mean_x, 
-           lower = mean_x - tcrit * se, 
-           upper = mean_x + tcrit * se,
-           n = n)
-}
-
-# Use all GPU metrics that exist
-gpu_times <- experiment_results_clean |>
-    filter(device == "gpu")
-
-# --------- CI WITH ALL REPLICATIONS ---------
-gpu_ci_all <- gpu_times |>
-    group_by(metric_name, problem_size, num_iterations) |>
-    summarise(ci = list(compute_ci(value)), .groups = "drop") |>
-    tidyr::unnest_wider(ci)
-
-cat("\n=== 99% Confidence Intervals (ALL REPLICATIONS) ===\n")
-print(gpu_ci_all)
-
-# --------- CI WITH SAMPLE OF 10 REPLICATIONS ---------
-set.seed(123)
-
-gpu_ci_sample10 <- gpu_times |>
-    group_by(metric_name, problem_size, num_iterations) |>
-    summarise(sample_values = list({
-        v <- value
-        if (length(v) > 10) sample(v, 10) else v
-    }), .groups = "drop") |>
-    mutate(ci = map(sample_values, compute_ci)) |>
-    select(-sample_values) |>
-    tidyr::unnest_wider(ci)
-
-cat("\n=== 99% Confidence Intervals (SAMPLE OF 10) ===\n")
-print(gpu_ci_sample10)
-
-print(gpu_ci_all, n = Inf)
-print(gpu_ci_sample10, n = Inf)
-
-# Total time and execution time analysis
-
-dir.create("plots", showWarnings = FALSE, recursive = TRUE)
-
-experiment_results_clean <- read.csv("./clean_dataset.csv") |>
+experiment_results_clean <- read.csv(file.path(base_dir, "clean_dataset.csv")) |>
     filter(is.na(value) == FALSE) |>
     mutate(
         machine_label = case_when(
@@ -223,10 +86,12 @@ plot_time_analysis <- function(data, exp) {
 
 p1a <- plot_time_analysis(time_summary, exp = 1)
 p1b <- plot_time_analysis(time_summary, exp = 2)
-ggsave("plots/plot1a_execution_vs_total_exp1.pdf", plot = p1a, width = 8, height = 5)
-ggsave("plots/plot1b_execution_vs_total_exp2.pdf", plot = p1b, width = 8, height = 5)
+ggsave(file.path(plots_dir, "plot1a_execution_vs_total_exp1.pdf"), plot = p1a, width = 8, height = 5)
+ggsave(file.path(plots_dir, "plot1b_execution_vs_total_exp2.pdf"), plot = p1b, width = 8, height = 5)
 
+# =============================================================================================== #
 # Throughput plot
+# =============================================================================================== #
 
 throughput_summary <- experiment_results_clean |>
   filter(metric_name == "msamples_per_sec") |>
@@ -265,10 +130,12 @@ plot_throughput <- function(data, exp) {
 p2a <- plot_throughput(throughput_summary, exp = 1)
 p2b <- plot_throughput(throughput_summary, exp = 2)
 
-ggsave("plots/plot2a_throughput_exp1.pdf", plot = p2a, width = 8, height = 5)
-ggsave("plots/plot2b_throughput_exp2.pdf", plot = p2b, width = 8, height = 5)
+ggsave(file.path(plots_dir, "plot2a_throughput_exp1.pdf"), plot = p2a, width = 8, height = 5)
+ggsave(file.path(plots_dir, "plot2b_throughput_exp2.pdf"), plot = p2b, width = 8, height = 5)
 
+# =============================================================================================== #
 # CPU Speedup and Efficiency Analysis
+# =============================================================================================== #
 
 cpu_data <- experiment_results_clean |>
     filter(device == "cpu") |>
@@ -340,8 +207,8 @@ plot_cpu_speedup <- function(data, exp) {
 p_speedup1 <- plot_cpu_speedup(cpu_speedup, 1)
 p_speedup2 <- plot_cpu_speedup(cpu_speedup, 2)
 
-ggsave("plots/plot3a_cpu_speedup_exp1.pdf", plot = p_speedup1, width = 8, height = 5)
-ggsave("plots/plot3b_cpu_speedup_exp2.pdf", plot = p_speedup2, width = 8, height = 5)
+ggsave(file.path(plots_dir, "plot3a_cpu_speedup_exp1.pdf"), plot = p_speedup1, width = 8, height = 5)
+ggsave(file.path(plots_dir, "plot3b_cpu_speedup_exp2.pdf"), plot = p_speedup2, width = 8, height = 5)
 
 plot_cpu_efficiency <- function(data, exp) {
     max_threads <- max(data$num_threads)
@@ -396,8 +263,8 @@ plot_cpu_efficiency <- function(data, exp) {
 p_efficiency1 <- plot_cpu_efficiency(cpu_speedup, 1)
 p_efficiency2 <- plot_cpu_efficiency(cpu_speedup, 2)
 
-ggsave("plots/plot4a_cpu_efficiency_exp1.pdf", plot = p_efficiency1, width = 8, height = 5)
-ggsave("plots/plot4b_cpu_efficiency_exp2.pdf", plot = p_efficiency2, width = 8, height = 5)
+ggsave(file.path(plots_dir, "plot4a_cpu_efficiency_exp1.pdf"), plot = p_efficiency1, width = 8, height = 5)
+ggsave(file.path(plots_dir, "plot4b_cpu_efficiency_exp2.pdf"), plot = p_efficiency2, width = 8, height = 5)
 
 plot_cpu_vs_gpu_speedup <- function(data, exp) {
     ggplot(data |> filter(experiment == exp),
@@ -431,7 +298,9 @@ plot_cpu_vs_gpu_speedup <- function(data, exp) {
     my_style()
 }
 
+# =============================================================================================== #
 # Overhead analysis
+# =============================================================================================== #
 
 overhead_df <- experiment_results_clean |>
     filter(metric_name %in% c("computation_time_s", "total_time_s")) |>
@@ -449,8 +318,6 @@ overhead_df <- experiment_results_clean |>
         mean_overhead_pct = 100 * (mean_total - mean_comp) / mean_total,
         .groups = "drop"
     )
-
-    
 
 plot_overhead_pct <- function(data, exp) {
     ggplot(data |> filter(experiment == exp), aes(x = problem_size, y = mean_overhead_pct, color = machine_label)) +
@@ -482,5 +349,5 @@ plot_overhead_pct <- function(data, exp) {
 p_overhead1 <- plot_overhead_pct(overhead_df, 1)
 p_overhead2 <- plot_overhead_pct(overhead_df, 2)
 
-ggsave("plots/plot5a_overhead_percent_exp1.pdf", plot = p_overhead1, width = 10, height = 6)
-ggsave("plots/plot5b_overhead_percent_exp2.pdf", plot = p_overhead2, width = 10, height = 6)
+ggsave(file.path(plots_dir, "plot5a_overhead_percent_exp1.pdf"), plot = p_overhead1, width = 10, height = 6)
+ggsave(file.path(plots_dir, "plot5b_overhead_percent_exp2.pdf"), plot = p_overhead2, width = 10, height = 6)

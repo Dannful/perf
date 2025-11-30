@@ -1,5 +1,8 @@
 library(DoE.base)
 library(tidyverse)
+library(here)
+
+exp_dir <- here("phases/3/experiments")
 
 generate_experiment <- function(factors, seed, path, replications) {
     DoE.base::fac.design(nfactors = length(factors), replications = replications,
@@ -14,8 +17,8 @@ replications <- 100
 seed <- 0
 cpu_factors <- list(Size = sizes, Iterations = iterations, Threads = c(1, 2, 4, 8, 16))
 gpu_factors <- list(Size = sizes, Iterations = iterations)
-generate_experiment(cpu_factors, seed, "./cpu.csv", replications = replications)
-generate_experiment(gpu_factors, seed, "./gpu.csv", replications = replications)
+generate_experiment(cpu_factors, seed, file.path(exp_dir, "cpu.csv"), replications = replications)
+generate_experiment(gpu_factors, seed, file.path(exp_dir, "gpu.csv"), replications = replications)
 
 
 ###################################################################################################
@@ -39,18 +42,18 @@ generate_experiment_gpu_2 <- function(factors, seed, path, replications) {
   readr::write_csv(path)
 }
 
-generate_experiment(cpu_factors, seed, "./cpu_2.csv", replications = replications)
-generate_experiment_gpu_2(gpu_factors, seed, "./gpu_2.csv", replications = replications)
+generate_experiment(cpu_factors, seed, file.path(exp_dir, "cpu_2.csv"), replications = replications)
+generate_experiment_gpu_2(gpu_factors, seed, file.path(exp_dir, "gpu_2.csv"), replications = replications)
 
 # Add iterations to match previous format
-cpu <- read_csv("./cpu_2.csv", col_types = cols(Blocks = col_character()))|>
+cpu <- read_csv(file.path(exp_dir, "cpu_2.csv"), col_types = cols(Blocks = col_character()))|>
   dplyr::mutate(Iterations = 25) |>
   dplyr::select(Size, Iterations, Threads, Blocks)
 
-readr::write_csv(cpu, "./cpu_2.csv")
+readr::write_csv(cpu, file.path(exp_dir, "cpu_2.csv"))
 
-gpu <- read_csv("./gpu_2.csv", col_types = cols(Blocks = col_character()))|>
+gpu <- read_csv(file.path(exp_dir, "gpu_2.csv"), col_types = cols(Blocks = col_character()))|>
   dplyr::mutate(Iterations = 25) |>
   dplyr::select(Size, Iterations, Blocks)
 
-readr::write_csv(gpu, "./gpu_2.csv")
+readr::write_csv(gpu, file.path(exp_dir,"gpu_2.csv"))

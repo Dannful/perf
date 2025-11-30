@@ -137,16 +137,17 @@ read_gpu_results <- function(folder, machine_name, experiment_number) {
   do.call(rbind, Filter(Negate(is.null), results_list))
 }
 
-base_dir <- here::here("phases/3/experiments")
+export_dir <- here::here("phases/3/analysis")
+exp_dir <- here::here("phases/3/experiments/raw_results")
 
 cat("\n=== Reading Experiment 1 ===\n")
-exp1_draco1 <- read_gpu_results(file.path(base_dir, "draco1-gpu"), "draco1", 1)
-exp1_draco2 <- read_cpu_results(file.path(base_dir, "draco2-cpu"), "draco2", 1)
+exp1_draco1 <- read_gpu_results(file.path(exp_dir, "draco1-gpu"), "draco1", 1)
+exp1_draco2 <- read_cpu_results(file.path(exp_dir, "draco2-cpu"), "draco2", 1)
 
 cat("\n=== Reading Experiment 2 ===\n")
-exp2_draco1 <- read_gpu_results(file.path(base_dir, "exp2_draco1-gpu"), "draco1", 2)
-exp2_draco2 <- read_cpu_results(file.path(base_dir, "exp2_draco2-cpu"), "draco2", 2)
-exp2_beagle <- read_gpu_results(file.path(base_dir, "beagle"), "beagle", 2) 
+exp2_draco1 <- read_gpu_results(file.path(exp_dir, "exp2_draco1-gpu"), "draco1", 2)
+exp2_draco2 <- read_cpu_results(file.path(exp_dir, "exp2_draco2-cpu"), "draco2", 2)
+exp2_beagle <- read_gpu_results(file.path(exp_dir, "beagle"), "beagle", 2) 
 
 all_results <- dplyr::bind_rows(
     exp1_draco1,
@@ -160,7 +161,7 @@ all_results <- dplyr::bind_rows(
   arrange(experiment, device, machine, problem_size, num_iterations, 
           num_threads, replication_index, metric_name)
 
-output_file <- file.path(base_dir, "../clean_dataset.csv")
+output_file <- file.path(export_dir, "clean_dataset.csv")
 write.csv(all_results, output_file, row.names = FALSE)
 
 cat("\n=== Summary ===\n")
