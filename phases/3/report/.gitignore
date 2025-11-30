@@ -1,4 +1,6 @@
 *.aux
 *.cut
 *.log
+*.bbl
+*.blg
 !*.tex

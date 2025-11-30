@@ -7,7 +7,7 @@
 #+EXPORT_SELECT_TAGS: export
 
 #+Title: *Performance analysis*
-#+Subtitle: Step II
+#+Subtitle: Step III
 #+Author: Francisco Pegoraro Etcheverria, Pedro Henrique Boniatti Colle, Vinícius Daniel Spadotto
 #+Date: \today
 
@@ -31,6 +31,15 @@ of iterations of partial differential equations over a discrete three dimensiona
 
 #+attr_latex: :center no :width .51\linewidth
 [[../../../img/rtm.jpeg]]
+
+* Related work
+
+** Optimization strategies for geophysics models on manycore systems
+
+Reveals the application's performance on many different architectures, and its limitations.
+
+Fundamentally related to the present work, specially when it comes to the application's I/O
+boundness.
 
 * Methodology
 
@@ -91,28 +100,16 @@ All experiments were executed at PCAD (https://gppd-hpc.inf.ufrgs.br), utilizing
   source("../analysis/generateAnalysis.R")
 #+END_SRC
 
+#+RESULTS:
+| /home/dannly/git/perf/phases/3/analysis/plots/plot5b_overhead_percent_exp2.pdf | FALSE |
+
+
 * Experiment 1: Asymptotic Behavior
   Goal: Validate algorithmic behavior with high replication (100x) on moderate problem sizes ($24^3$ to $120^3$).
 
 * Execution Time (Exp 1)
   Computation (solid) is strictly linear. Total time (dashed) diverges due to disk I/O scaling with problem size/iterations.
   [[file:../analysis/plots/plot1a_execution_vs_total_exp1.pdf]]
-
-* Overhead (Exp 1)
-  Significant relative overhead for small inputs. Computation time is insufficient to mask management costs.
-  [[file:../analysis/plots/plot5a_overhead_percent_exp1.pdf]]
-
-* Speedup (Exp 1)
-  Saturates early for small problems ($24^3$). Communication costs negate benefits of additional threads.
-  [[file:../analysis/plots/plot3a_cpu_speedup_exp1.pdf]]
-
-* Efficiency (Exp 1)
-  Sharp drops with increased threads highlight underutilization in fine-grained tasks.
-  [[file:../analysis/plots/plot4a_cpu_efficiency_exp1.pdf]]
-
-* Throughput (Exp 1)
-  Saturates early, limited by system overheads relative to the small workload.
-  [[file:../analysis/plots/plot2a_throughput_exp1.pdf]]
 
 * Experiment 2: Large Scale Scalability
   Goal: Stress test with large problem sizes (up to $504^3$) to verify scalability and overhead dilution.
@@ -122,7 +119,10 @@ All experiments were executed at PCAD (https://gppd-hpc.inf.ufrgs.br), utilizing
   [[file:../analysis/plots/plot1b_execution_vs_total_exp2.pdf]]
 
 * Overhead (Exp 2)
-  Drastic reduction in relative overhead. Useful computation dominates execution.
+  Drastic reduction in relative overhead. Useful computation dominates execution in CPU.
+
+  GPU suffers more, due to its proficiency in exploring parallelism.
+
   [[file:../analysis/plots/plot5b_overhead_percent_exp2.pdf]]
 
 * Speedup (Exp 2)
@@ -134,7 +134,7 @@ All experiments were executed at PCAD (https://gppd-hpc.inf.ufrgs.br), utilizing
   [[file:../analysis/plots/plot4b_cpu_efficiency_exp2.pdf]]
 
 * Throughput (Exp 2)
-  Maximum performance achieved by saturating FP units and masking memory latency.
+GPU dominates the general throughput, displaying a resource saturation at problem size $\approx 150$.
   [[file:../analysis/plots/plot2b_throughput_exp2.pdf]]
 
 * Conclusion
