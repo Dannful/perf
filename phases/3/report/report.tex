@@ -278,7 +278,7 @@ A seguir, discutem-se os detalhes de cada etapa experimental, integrando as aná
 
 O foco inicial desta etapa foi validar o comportamento do algoritmo sob condições estatisticamente robustas (100 replicações), utilizando tamanhos de problema contidos ($24^3$ a $120^3$).
 
-A Figura \ref{fig:exec_time_exp1} corrobora a complexidade $O(n)$ da aplicação. A linearidade observada é rigorosa, e as barras de erro (ínfimas devido à alta replicabilidade) confirmam a estabilidade da implementação no ambiente de testes. É importante distinguir o Tempo de Computação (linha sólida) do Tempo Total (linha tracejada). O Tempo Total inclui a escrita em disco dos resultados, operação cujo custo escala proporcionalmente com o tamanho do problema e o número de iterações, explicando o desvio crescente em relação ao tempo de processamento puro.
+A Figura \ref{fig:exec_time_exp1} corrobora o comportamento assintótico ($O(n)$) da aplicação. A linearidade observada é rigorosa, fortemente fundamentada pela tênue variabilidade. Ademais, distingue-se o Tempo de Computação (linha sólida) do Tempo Total (linha tracejada): o Tempo Total inclui a escrita em disco dos resultados, operação cujo custo escala proporcionalmente com o tamanho do problema e o número de iterações, explicando o desvio crescente em relação ao tempo de processamento puro.
 
 \begin{figure}[hbt!]
     \centering
@@ -287,7 +287,7 @@ A Figura \ref{fig:exec_time_exp1} corrobora a complexidade $O(n)$ da aplicação
     \label{fig:exec_time_exp1}
 \end{figure}
 
-No entanto, a utilização de tamanhos de problema menores revela o custo relativo da gestão de paralelismo. Conforme observado na Figura \ref{fig:overhead_exp1}, a sobrecarga (overhead) percentual é significativamente alta para entradas pequenas. Nestes cenários, a granularidade da tarefa é fina demais, fazendo com que o tempo gasto criando e sincronizando \textit{threads} represente uma fração substancial do tempo total.
+Entretanto, a utilização de tamanhos de problema restritos revela, sobretudo, o custo de \textit{overhead} associado ao paralelismo. Conforme observado na Figura \ref{fig:overhead_exp1}, a sobrecarga percentual é significativamente alta para entradas pequenas. Em tais cenários, a granularidade, sendo muito fina, acarreta o fato de o tempo gasto criando e sincronizando \textit{threads} represente uma fração significativa do tempo total.
 
 \begin{figure}[hbt!]
     \centering
@@ -296,7 +296,7 @@ No entanto, a utilização de tamanhos de problema menores revela o custo relati
     \label{fig:overhead_exp1}
 \end{figure}
 
-Este overhead impõe um teto ao ganho de desempenho. A Figura \ref{fig:speedup_exp1} demonstra que o Speedup se distancia do ideal linear à medida que o número de threads aumenta. Para os menores problemas ($24^3$), o ganho de velocidade estagna rapidamente. Nota-se também que o Speedup do Tempo Total tende a ser inferior ao de Computação, pois as operações de I/O incluídas no total são inerentemente seriais ou limitadas pela largura de banda do disco, não se beneficiando do paralelismo da mesma forma que o cálculo numérico.
+A sobrecarga supracitada impõe um limite ao ganho de desempenho. A Figura \ref{fig:speedup_exp1} demonstra que o Speedup se distancia do ideal à medida que o número de threads aumenta. Para os menores problemas ($24^3$), o ganho de velocidade estagna rapidamente. Nota-se, ademais, que o Speedup do Tempo Total tende a ser inferior ao de Computação, pois as operações de I/O incluídas no total são inerentemente seriais ou limitadas pela largura de banda do disco, não se beneficiando do paralelismo da mesma forma que o cálculo numérico.
 
 \begin{figure}[hbt!]
     \centering
