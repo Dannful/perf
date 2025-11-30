@@ -338,3 +338,55 @@ p_overhead2 <- plot_overhead_pct(overhead_df, 2)
 
 ggsave(file.path(plots_dir, "plot5a_overhead_percent_exp1.pdf"), plot = p_overhead1, width = 10, height = 6)
 ggsave(file.path(plots_dir, "plot5b_overhead_percent_exp2.pdf"), plot = p_overhead2, width = 10, height = 6)
+
+
+# =============================================================================================== #
+# Linear Models for Computation time
+# =============================================================================================== #
+
+pdf(file.path(plots_dir, "lm_diagnostics.pdf"), width = 10, height = 8)
+
+create_linear_model <- function(data, formula, facet_vars = NULL) {
+    lm(formula, data = data)
+    model <- lm(formula, data = data)
+
+    print(summary(model))
+    lm_data_long <- data |>
+        mutate(predicted = predict(model)) |>
+        tidyr::pivot_longer(cols = c("value", "predicted"), 
+                           names_to = "type", 
+                           values_to = "computation_time_s")
+    p_lm1 <- ggplot(lm_data_long, aes(x = problem_size, y = computation_time_s, color = type)) +
+        geom_point(alpha = 0.6) + 
+        geom_line(aes(group = type), alpha = 0.6) + 
+        facet_grid(facet_vars, scales = "free_y") + 
+        labs(y = "Computation Time (s)", color = "Type") + 
+        my_style()
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(2, 1, heights = unit(c(0.1, 0.9), "npc"))))
+    grid.text("Linear Model Diagnostics: Actual vs. Predicted", 
+              gp = gpar(fontsize = 16),
+              vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+    print(p_lm1, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+    par(mfrow=c(2,2))
+    plot(model)
+}
+
+    
+cp_time_cpu_model <- create_linear_model(
+    experiment_results_clean |> filter(device == "cpu") |> filter(metric_name == "computation_time_s"), 
+    value ~ I(problem_size^3) * num_iterations * I(1/num_threads), 
+    num_threads ~ num_iterations
+)
+                          
+cp_time_draco_gpu_model <- create_linear_model(
+    experiment_results_clean |> filter(device == "gpu") |> filter(machine == "draco1") |> filter(metric_name == "computation_time_s"), 
+    value ~ I(problem_size^3) * num_iterations, 
+    ~ num_iterations
+)
+
+cp_time_beagle_gpu_model <- create_linear_model(
+    experiment_results_clean |> filter(device == "gpu") |> filter(machine == "beagle") |> filter(metric_name == "computation_time_s"), 
+    value ~ I(problem_size^3) * num_iterations, 
+    ~ num_iterations
+)
