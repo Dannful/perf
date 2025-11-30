@@ -67,15 +67,14 @@ plot_time_analysis <- function(data, exp) {
                   width = 5, alpha = 1.0, linewidth = 0.5) +
     geom_line(linewidth = 0.8) +
     geom_point(size = 2.5) +
-    facet_grid(
-        rows = vars(device),
-        cols = vars(num_iterations),
+    facet_wrap(
+        ~ device + num_iterations,
         scales = "free_y",
         labeller = labeller(
-            device = c(cpu = "CPU", gpu = "GPU"),
-            num_iterations = function(x) paste0("Iterações: ", x)
+             device = c(cpu = "CPU", gpu = "GPU"),
+             num_iterations = function(x) paste0("Iterações: ", x)
         )
-    ) +
+    ) + 
     labs(
         x = "Tamanho do problema",
         y = "Tempo (s)",
