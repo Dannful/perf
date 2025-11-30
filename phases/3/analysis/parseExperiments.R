@@ -138,16 +138,15 @@ read_gpu_results <- function(folder, machine_name, experiment_number) {
 }
 
 export_dir <- here::here("phases/3/analysis")
-exp_dir <- here::here("phases/3/experiments/raw_results")
+experiment_dir <- here::here("phases/3/experiments/raw_results")
 
 cat("\n=== Reading Experiment 1 ===\n")
-exp1_draco1 <- read_gpu_results(file.path(exp_dir, "draco1-gpu"), "draco1", 1)
-exp1_draco2 <- read_cpu_results(file.path(exp_dir, "draco2-cpu"), "draco2", 1)
-
+exp1_draco1 <- read_gpu_results(file.path(experiment_dir, "draco1-gpu"), "draco1", 1)
+exp1_draco2 <- read_cpu_results(file.path(experiment_dir, "draco2-cpu"), "draco2", 1)
 cat("\n=== Reading Experiment 2 ===\n")
-exp2_draco1 <- read_gpu_results(file.path(exp_dir, "exp2_draco1-gpu"), "draco1", 2)
-exp2_draco2 <- read_cpu_results(file.path(exp_dir, "exp2_draco2-cpu"), "draco2", 2)
-exp2_beagle <- read_gpu_results(file.path(exp_dir, "beagle"), "beagle", 2) 
+exp2_draco1 <- read_gpu_results(file.path(experiment_dir, "exp2_draco1-gpu"), "draco1", 2)
+exp2_draco2 <- read_cpu_results(file.path(experiment_dir, "exp2_draco2-cpu"), "draco2", 2)
+exp2_beagle <- read_gpu_results(file.path(experiment_dir, "beagle"), "beagle", 2) 
 
 all_results <- dplyr::bind_rows(
     exp1_draco1,
