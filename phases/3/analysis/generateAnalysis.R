@@ -4,6 +4,7 @@ library(grid)
 library(purrr)
 library(tidyr)
 library(here)
+library(ggh4x)
 
 my_style <- function() {
   list(
@@ -79,9 +80,10 @@ plot_time_analysis <- function(data, exp) {
     scale_x_continuous(breaks = seq(0, 500, 50))
 
     if (length(unique(df$num_iterations)) > 1) {
-        p <- p + facet_wrap(
-            ~ device + num_iterations,
+        p <- p + facet_grid2(
+            device ~ num_iterations,
             scales = "free_y",
+            independent = "y",
             labeller = labeller(
                 device = c(cpu = "CPU", gpu = "GPU"),
                 num_iterations = function(x) paste0("Iterações: ", x)
@@ -409,7 +411,7 @@ cp_time_beagle_gpu_model <- create_linear_model(
 p_draco_cpu_lm <- plot_lm(
     cpu_draco_data,
     cp_time_cpu_model,
-    facet_wrap(~ num_iterations + num_threads, scales = "free_y", labeller = labeller(
+    facet_grid2(num_iterations ~ num_threads, scales = "free_y", independent = "y", labeller = labeller(
         num_iterations = function(x) paste0("Iterações: ", x),
         num_threads = function(x) paste0("Cores: ", x)
     ))
