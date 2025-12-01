@@ -1,0 +1,132 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{6}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[Fletcher et~al\mbox{.}(2009)]%
+        {FLETCHER}
+\bibfield{author}{\bibinfo{person}{Robin Fletcher}, \bibinfo{person}{Xiang Du},
+  {and} \bibinfo{person}{Paul Fowler}.} \bibinfo{year}{2009}\natexlab{}.
+\newblock \showarticletitle{Reverse time migration in tilted transversely
+  isotropic (TTI) media}.
+\newblock \bibinfo{journal}{\emph{Geophysics}}  \bibinfo{volume}{74}
+  (\bibinfo{date}{11} \bibinfo{year}{2009}).
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1190/1.3269902}
+\showDOI{\tempurl}
+
+
+\bibitem[Forum(1994)]%
+        {MPI}
+\bibfield{author}{\bibinfo{person}{Message~P Forum}.}
+  \bibinfo{year}{1994}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{MPI: A Message-Passing Interface
+  Standard}}.
+\newblock \bibinfo{type}{{T}echnical {R}eport}. \bibinfo{address}{USA}.
+\newblock
+
+
+\bibitem[Kunas et~al\mbox{.}(2025)]%
+        {IOFLETCH}
+\bibfield{author}{\bibinfo{person}{Cristiano Kunas}, \bibinfo{person}{Gabriel
+  Freytag}, {and} \bibinfo{person}{Philippe Navaux}.}
+  \bibinfo{year}{2025}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Enhancing Reverse Time Migration
+  Simulations in HPC Systems Through I/O and Computation Overlapping}}.
+\newblock \bibinfo{pages}{68--82}.
+\newblock
+\showISBNx{978-3-031-80083-2}
+\urldef\tempurl%
+\url{https://doi.org/10.1007/978-3-031-80084-9_5}
+\showDOI{\tempurl}
+
+
+\bibitem[Machado et~al\mbox{.}(2024)]%
+        {MPIIOFLETCH}
+\bibfield{author}{\bibinfo{person}{Rodrigo Machado}, \bibinfo{person}{Arthur
+  Lorenzon}, {and} \bibinfo{person}{Philippe Navaux}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Paralelização de computação e escrita em
+  aplicações de simulação de propagação de ondas utilizando o padrão de
+  comunicação MPI}.
+\newblock \bibinfo{journal}{\emph{Escola Regional de Alto Desempenho da Região
+  Sul (ERAD-RS)}}, \bibinfo{pages}{13--16}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.5753/eradrs.2024.238727}
+\showDOI{\tempurl}
+
+
+\bibitem[Serpa et~al\mbox{.}(2021)]%
+        {ENERGYFLETCH}
+\bibfield{author}{\bibinfo{person}{Matheus Serpa}, \bibinfo{person}{Pablo
+  Pavan}, \bibinfo{person}{Eduardo Cruz}, \bibinfo{person}{Rodrigo Machado},
+  \bibinfo{person}{Jairo Panetta}, \bibinfo{person}{Antonio~Carlos Azambuja},
+  \bibinfo{person}{Alexandre Carissimi}, {and} \bibinfo{person}{Philippe
+  Navaux}.} \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{Energy efficiency and portability of oil and gas
+  simulations on multicore and graphics processing unit architectures}.
+\newblock \bibinfo{journal}{\emph{Concurrency and Computation: Practice and
+  Experience}}  \bibinfo{volume}{33} (\bibinfo{date}{02} \bibinfo{year}{2021}).
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1002/cpe.6212}
+\showDOI{\tempurl}
+
+
+\bibitem[Serpa et~al\mbox{.}(2019)]%
+        {OPTIMIZEFLETCHER}
+\bibfield{author}{\bibinfo{person}{Matheus~S Serpa},
+  \bibinfo{person}{Eduardo~HM Cruz}, \bibinfo{person}{Matthias Diener},
+  \bibinfo{person}{Arthur~M Krause}, \bibinfo{person}{Philippe~OA Navaux},
+  \bibinfo{person}{Jairo Panetta}, \bibinfo{person}{Albert Farrés},
+  \bibinfo{person}{Claudia Rosas}, {and} \bibinfo{person}{Mauricio Hanzich}.}
+  \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Optimization strategies for geophysics models on
+  manycore systems}.
+\newblock \bibinfo{journal}{\emph{The International Journal of High Performance
+  Computing Applications}} \bibinfo{volume}{33}, \bibinfo{number}{3}
+  (\bibinfo{year}{2019}), \bibinfo{pages}{473--486}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1177/1094342018824150}
+\showDOI{\tempurl}
+\showeprint{https://doi.org/10.1177/1094342018824150}
+
+
+\end{thebibliography}

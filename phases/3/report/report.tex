@@ -47,6 +47,7 @@
 \documentclass[acmsmall]{acmart}
 \usepackage{makecell}
 \usepackage[brazil]{babel}
+\usepackage{todonotes}
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -163,55 +164,47 @@ A aplicação é altamente paralelizável e este trabalho foca em determinar a s
 
 \section{Trabalhos relacionados}
 
-A introdução já apresenta a pesquisa central no qual a aplicação Fletcher se baseia \cite{FLETCHER}. O modelo deste trabalho, de analise de desempenho para diferentes parâmetros da aplicação, vai de encontro com a pesquisa de \citet{OPTIMIZEFLETCHER}. A pesquisa apresenta a performance da aplicação em diferentes arquiteturas (\textit{backends}), assim como otimizações para melhor a performance da aplicação quanto a essas. Este trabalho serve como uma extensão dessa pesquisa, testando em arquiteturas mais modernas não presentes na época. 
+A introdução já apresenta a pesquisa central no qual a aplicação Fletcher se baseia \cite{FLETCHER}. O modelo deste trabalho, análise de desempenho para diferentes parâmetros da aplicação, vai de encontro com a pesquisa de \citet{OPTIMIZEFLETCHER}. A pesquisa apresenta o desempenho da aplicação em diferentes arquiteturas (\textit{backends}), assim como otimizações para melhorá-lo em alguns desses contextos. Este trabalho serve como uma extensão dessa pesquisa, testando em arquiteturas mais modernas não presentes na época. 
 
 As limitações da aplicação Fletcher já são conhecidas \cite{OPTIMIZEFLETCHER}. Trabalhos como 
-\citet{IOFLETCH} e  \citet{MPIIOFLETCH} exploram formas de realizar IO para ler computações intermediárias da aplicação, sem causar grandes perdas de performance na aplicação. A análise do gasto energético e portabilidade da aplicação também foi estudado em \citet{ENERGYFLETCH}.
+\citet{IOFLETCH} e  \citet{MPIIOFLETCH} exploram formas de realizar IO para ler computações intermediárias da aplicação, sem causar grandes perdas de desempenho na aplicação. A análise do gasto energético e portabilidade da aplicação também foi estudado em \citet{ENERGYFLETCH}.
 
-A conclusão desses trabalhos é que muito esforço já foi realizado partindo de uma análise já antiga da aplicação. Uma revisão dessa análise, usando arquiteturas mais modernas, é de alta relevância para os trabalhos que precederam e sucederão.
+Ao analisar esses trabalhos, pode-se concluir que muito esforço já foi realizado partindo de uma análise já antiga da aplicação. Uma revisão dessa análise, usando arquiteturas mais modernas, é de alta relevância para trabalhos que o precederam e o sucederão.
 
 \section{Metodologia}
 
-A metodologia empregada para a realização do presente trabalho deu-se mediante
-a execução de experimentos com fatores pré-definidos e sob condições de execução estabelecidas e
-devidamente controladas para atingir os objetivos estipulados.
+A metodologia empregada para a realização do presente trabalho deu-se mediante a execução de experimentos com fatores pré-definidos e sob condições de execução estabelecidas e devidamente controladas para atingir os objetivos estipulados. Realizou-se inicialmente um projeto experimental que amplamente variava os fatores, com várias iterações, mas com um tempo de execução máximo pequeno. Isso permitiu explorar o espaço de possibilidades do projeto. Dessa primeira análise pode-se reduzir o escopo dos experimentos sem perder o foco do projeto, gerando um projeto experimental com execuções com um tempo máximo significativamente maior. Nessa segunda geração de resultado, consegui-se utilizar mais máquinas para observar os resultados para mais arquiteturas de GPU.
 
 \subsection{Objetivos}
 
-Visou-se a configurar um ambiente suficientemente controlado para a observação do comportamento da aplicação,
-focando em como os fatores definidos para a execução impactam nas saídas capturadas. Definiu-se, pois, como objetivo a
-obtenção dos dados brutos e a subsequente utilização destes para a construção de um modelo de regressão linear que apropriadamente
-relacionasse os fatores à saída---esta dada em \textit{MSamples/s}---devidamente fundamentada por um teste de hipótese adequado.
+Este trabalho almeja gerar dados brutos, precisos e controlados que cubram todo o espaço de análise da aplicação. Com esses dados, busca-se analisar a correlação do tempo de execução e vasão de aplicações Fletcher com relação a tamanho de problema, número de iterações e arquitetura usada para computar. Dentre essas arquiteturas analisa-se o efeito do modelo de GPU e CPU nos parâmetros de saída analisados. Adicionalmente, no caso da CPU, considera-se também o número de \textit{threads} e o efeito destes na computação. A geração dessa análise busca apontar \textit{bottlenecks} no tempo de computação, assim como projetar tempos de execução para tamanhos maiores de problema. 
 
 \subsection{Projetos experimentais}
 
-Foram realizados \textbf{2} projetos experimentais \textit{full factorial} de múltiplos fatores em sequência, tendo o último sido baseado nas observações
-advindas da execucação do primeiro.
-
-Cada projeto foi dividido em dois conjuntos de experimentos distintos: \textbf{CPU} e \textbf{GPU}.
+Foram realizados \textbf{2} projetos experimentais \textit{full factorial} de múltiplos fatores em sequência. O primeiro buscou verificar se o incremento das iterações do problema era consequente a variância dos resultados. Com essa resposta em mãos, realizou-se o segundo projeto experimental, expandido o escopo para arquiteturas não compreendidas no primeiro projeto experimental. 
 
 \begin{table}[H]
-  \caption{Projetos experimentais para CPU}
-  \label{tab:projexpcpu}
+  \caption{Primeiro Projeto experimental}
+  \label{tab:fstprojexp}
   \begin{tabular}{ccccc}
     \toprule
-    Projeto experimental&Dimensões do dado de entrada&N\textdegree de iterações&N\textdegree de \textit{threads}&Replicações\\
+    \textit{Backend}&Dimensões do dado de entrada&N\textdegree de iterações&N\textdegree de \textit{threads}&Replicações\\
     \midrule
-    1 & $24^3$, $56^3$, $120^3$ & $10$, $100$, $1000$ & $1$, $2$, $4$, $8$, $16$ & 100\\
-    2 & $24^3$, $88^3$, $152^3$, $248^3$, $376^3$, $504^3$ & $25$ & $1$, $2$, $4$, $8$, $16$ & 10\\
+    CPU & $24^3$, $56^3$, $120^3$ & $10$, $100$, $1000$ & $1$, $2$, $4$, $8$, $16$ & 100\\
+    GPU & $24^3$, $56^3$, $120^3$ & $10$, $100$, $1000$ & $-$ & 100\\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \begin{table}[H]
-  \caption{Projetos experimentais para GPU}
-  \label{tab:projexpgpu}
-  \begin{tabular}{cccc}
+  \caption{Segundo projetos experimental}
+  \label{tab:sndprojexp}
+  \begin{tabular}{ccccc}
     \toprule
-    Projeto experimental&Dimensões do dado de entrada&N\textdegree de iterações&Replicações\\
+    \textit{Backend}&Dimensões do dado de entrada&N\textdegree de iterações&N\textdegree de \textit{threads}&Replicações\\
     \midrule
-    1 & $24^3$, $56^3$, $120^3$ & $10$, $100$, $1000$ & 100\\
-    2 & $24^3$, $88^3$, $152^3$, $248^3$, $376^3$, $504^3$ & $25$ & 10\\
+    CPU & $24^3$, $88^3$, $152^3$, $248^3$, $376^3$, $504^3$ & $25$ & $1$, $2$, $4$, $8$, $16$ & 10\\
+    GPU & $24^3$, $88^3$, $152^3$, $248^3$, $376^3$, $504^3$ & $25$ & $-$ & 10\\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -253,6 +246,69 @@ as máquinas \textbf{draco} e \textbf{beagle}.
 
 \section{Resultados}
 
+\subsection{Primeiro Projeto Experimental}
+Realizou-se o primeiro projeto experimental \ref{tab:fstprojexp}. Nele, variou-se o tamanho do problema e o número de iterações, buscando realizar 100 replicações para cada caso. Mesmo reduzindo o tempo de execução de cada experimento usando tamanhos menores para o volume,  conseguiu-se apenas realizar 19 dessas replicações no tempo alocado para a computação. Entretanto, pôde-se observar que mesmo com esse número reduzido de replicações, nenhuma configuração do experimento apresentou variância significativa, independente do número de iterações.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot1a_execution_vs_total_exp1.pdf}
+    \caption{Tempo de Execução vs. Tamanho Total: Experimento 1.}
+    \label{fig:exec_time_exp1}
+\end{figure}
+
+Todas as computações também apresentam a mesma curva de crescimento independente do número de iterações para o programa. Ou seja, o crescimento do tempo de execução é consistente quanto ao número de iterações.
+
+Uma característica do programa não antes discutida é a diferença entre tempo de computação, tempo realizando as contas propriamente; e tempo total. Esse tempo total inclui escrita em disco para salvar os resultados. Ele já pode ser notado na computação da GPU e será mais marcante no segundo projeto experimental. Isso também é ilustrado pelo tempo de \textit{overhead} (porcentagem do tempo total não focado em computação) observado. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot5a_overhead_percent_exp1.pdf}
+    \caption{Tamanho do problema vs. Iterações vs. \textit{overhead}: Experimento 1.}
+    \label{fig:overhead1}
+\end{figure}
+
+Observa-se que a GPU é tão veloz que a escrita em disco compreende parte significativa do tempo de execução, aumentando com o número de iterações e tamanho do problema. Isso é esperado. A cada iteração do programa, salva todo o volume em um arquivo, com uma estimativa de crescimento de $O(ti)$, com $t$ sendo o tamanho e $i$ sendo o número de iterações. A computação na CPU não parece ter essa escrita como um \textit{bottleneck} significativo, para maiores tamanhos, menos o tempo relativo.
+
+Nisso, pode-se fixar o número de iterações visto que não há variância significativa. Utilizou-se 25 iterações como um meio-termo entre 10 e 100 iterações. Formulou-se então o projeto experimental \ref{tab:sndprojexp}.
+
+\subsection{Segundo Projeto Experimental}
+Realizou-se o segundo projeto experimental \ref{tab:sndprojexp} utilizando-se maiores tamanhos de problemas. Nisso, replica-se o gráfico \ref{fig:exec_time_exp1}, agora com iterações fixas em 25 e com mais uma arquitetura de GPU.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot1b_execution_vs_total_exp2.pdf}
+    \caption{Tamanho do Problema vs. Tempo de execução: experimento 2.}
+    \label{fig:exec2}
+\end{figure}
+
+A escalabilidade do problema se apresenta igual. Quanto maior o problema, maior demora no tempo de execução. Observa-se que não se conseguiu executar para o tamanho $= 500$ na GPU da \textit{draco}, pois esta não tinha memória suficiente para conter o volume inteiro. Ao observar então as \textit{Msamples/s} do programa, constrói-se o gráfico \ref{fig:throughput2}, que demonstra o crescimento da eficiência de computação de cada arquitetura a medida que o programa cresce. A \textit{beagle} mostrou um crescimento significativo, porém com uma variância grande, até o tamanho de $150^3$. Depois desse ponto o \textit{overhead} começou a atrasar significativamente a computação. Efeito esse claramente visto no Gráfico \ref{fig:overhead2}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot2b_throughput_exp2.pdf}
+    \caption{TODO}
+    \label{fig:throughput2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot5b_overhead_percent_exp2.pdf}
+    \caption{Tamanho do problema vs. Iterações vs. \textit{overhead}: Experimento 2.}
+    \label{fig:overhead2}
+\end{figure}
+
+No lado da CPU, pode-se desenhar um gráfico de gnanho de eficiência, no qual o eixo y contém o \textit{speedup} (ganho de velocidade) relativo a uma \textit{thread}. No Gráfico \ref{fig:speedup2}, observa-se que o ganho de velocidade com o aumento de \textit{thread} é quase que totalmente linear, com o tempo total caindo sempre abaixo dessa linha. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/plot3b_cpu_speedup_exp2.pdf}
+    \caption{TODO}
+    \label{fig:speedup2}
+\end{figure}
+
+
+\subsection{Projeções}
+
 Após a execução do primeiro projeto experimental, observou-se a possibilidade de realizar um novo projeto,
 almejando um tamanho de problema de entrada maior, porém com uma quantidade menor de iterações. Conforme
 as tabelas \ref{tab:projexpcpu} e \ref{tab:projexpgpu}, a primeira bateria experimental confere uma variabilidade menor
@@ -274,101 +330,6 @@ acabam por contribuir de maneira similarmente igual e tênue para os valores de 
 
 A seguir, discutem-se os detalhes de cada etapa experimental, integrando as análises visuais à narrativa de desempenho da aplicação.
 
-\subsection{Experimento 1: Comportamento Assintótico e Variância}
-
-O foco inicial desta etapa foi validar o comportamento do algoritmo sob condições estatisticamente robustas (100 replicações), utilizando tamanhos de problema contidos ($24^3$ a $120^3$).
-
-A Figura \ref{fig:exec_time_exp1} corrobora o comportamento assintótico ($O(n)$) da aplicação. A linearidade observada é rigorosa, fortemente fundamentada pela tênue variabilidade. Ademais, distingue-se o Tempo de Computação (linha sólida) do Tempo Total (linha tracejada): o Tempo Total inclui a escrita em disco dos resultados, operação cujo custo escala proporcionalmente com o tamanho do problema e o número de iterações, explicando o desvio crescente em relação ao tempo de processamento puro.
-
-\begin{figure}[hbt!]
-    \centering
-    \includegraphics[width=\textwidth]{../analysis/plots/plot1a_execution_vs_total_exp1.pdf}
-    \caption{Tempo de Execução vs. Tamanho Total: Experimento 1. A linearidade confirma a complexidade $O(n)$.}
-    \label{fig:exec_time_exp1}
-\end{figure}
-
-Entretanto, a utilização de tamanhos de problema restritos revela, sobretudo, o custo de \textit{overhead} associado ao paralelismo. Conforme observado na Figura \ref{fig:overhead_exp1}, a sobrecarga percentual é significativamente alta para entradas pequenas. Em tais cenários, a granularidade, sendo muito fina, acarreta o fato de o tempo gasto criando e sincronizando \textit{threads} represente uma fração significativa do tempo total.
-
-\begin{figure}[hbt!]
-    \centering
-    \includegraphics[width=\textwidth]{../analysis/plots/plot5a_overhead_percent_exp1.pdf}
-    \caption{Sobrecarga Percentual: Experimento 1. O impacto da gestão de threads é acentuado em cargas menores.}
-    \label{fig:overhead_exp1}
-\end{figure}
-
-A sobrecarga supracitada impõe um limite ao ganho de desempenho. A Figura \ref{fig:speedup_exp1} demonstra que o Speedup se distancia do ideal à medida que o número de threads aumenta. Para os menores problemas ($24^3$), o ganho de velocidade estagna rapidamente. Nota-se, ademais, que o Speedup do Tempo Total tende a ser inferior ao de Computação, pois as operações de I/O incluídas no total são inerentemente seriais ou limitadas pela largura de banda do disco, não se beneficiando do paralelismo da mesma forma que o cálculo numérico.
-
-\begin{figure}[hbt!]
-    \centering
-    \includegraphics[width=\textwidth]{../analysis/plots/plot3a_cpu_speedup_exp1.pdf}
-    \caption{Speedup em CPU: Experimento 1. Saturação precoce do ganho de velocidade em problemas pequenos.}
-    \label{fig:speedup_exp1}
-\end{figure}
-
-Consequentemente, a eficiência paralela sofre uma degradação acentuada. A Figura \ref{fig:efficiency_exp1} ilustra como a eficiência cai drasticamente para problemas pequenos ao utilizar muitas threads. Isso evidencia que, para esta escala de dados, a aplicação é subutilizada em arquiteturas com muitos núcleos.
-
-\begin{figure}[hbt!]
-    \centering
-    \includegraphics[width=\textwidth]{../analysis/plots/plot4a_cpu_efficiency_exp1.pdf}
-    \caption{Eficiência em CPU: Experimento 1. Queda de eficiência devido à Lei de Amdahl e overhead fixo.}
-    \label{fig:efficiency_exp1}
-\end{figure}
-
-A métrica final de desempenho bruto, a vazão (throughput), é apresentada na Figura \ref{fig:throughput_exp1}. Observa-se que, embora a vazão aumente com o tamanho do problema, ela tende a estabilizar, sugerindo que gargalos de memória ou overheads de sistema impedem um crescimento contínuo nesta escala de teste.
-
-\begin{figure}[hbt!]
-    \centering
-    \includegraphics[width=\textwidth]{../analysis/plots/plot2a_throughput_exp1.pdf}
-    \caption{Vazão (MSamples/s): Experimento 1. Estabilização do throughput.}
-    \label{fig:throughput_exp1}
-\end{figure}
-
-\subsection{Experimento 2: Escalabilidade em Larga Escala}
-
-Com base na estabilidade verificada anteriormente, o Experimento 2 estressou a arquitetura com volumes de dados significativamente maiores (até $504^3$). A Figura \ref{fig:exec_time_exp2} demonstra que, mesmo sob carga intensa e com menos replicações, a aplicação mantém seu comportamento linear previsível. Novamente, o Tempo Total apresenta uma inclinação maior que o Tempo de Computação, refletindo o custo de I/O associado à geração de arquivos de saída massivos, proporcionais ao volume da grade simulada.
-
-\begin{figure}[hbt!]
-    \centering
-    \includegraphics[width=\textwidth]{../analysis/plots/plot1b_execution_vs_total_exp2.pdf}
-    \caption{Tempo de Execução vs. Tamanho Total: Experimento 2. Linearidade mantida em escalas maiores.}
-    \label{fig:exec_time_exp2}
-\end{figure}
-
-O principal benefício do aumento da carga de trabalho é a diluição dos custos fixos de paralelismo. Ao comparar a Figura \ref{fig:overhead_exp2} com o experimento anterior, nota-se uma queda drástica na sobrecarga percentual. O tempo de computação útil domina a execução, tornando o custo de gerenciamento de threads virtualmente negligenciável para os maiores problemas.
-
-\begin{figure}[hbt!]
-    \centering
-    \includegraphics[width=\textwidth]{../analysis/plots/plot5b_overhead_percent_exp2.pdf}
-    \caption{Sobrecarga Percentual: Experimento 2. Diluição significativa do overhead.}
-    \label{fig:overhead_exp2}
-\end{figure}
-
-Com o overhead controlado, a escalabilidade da aplicação melhora substancialmente. A Figura \ref{fig:speedup_exp2} mostra curvas de Speedup muito mais próximas do ideal linear, indicando que a adição de recursos computacionais está sendo efetivamente convertida em desempenho.
-
-\begin{figure}[hbt!]
-    \centering
-    \includegraphics[width=\textwidth]{../analysis/plots/plot3b_cpu_speedup_exp2.pdf}
-    \caption{Speedup em CPU: Experimento 2. Escalabilidade superior devido à maior granularidade.}
-    \label{fig:speedup_exp2}
-\end{figure}
-
-Da mesma forma, a eficiência paralela é preservada. A Figura \ref{fig:efficiency_exp2} evidencia que, para grandes volumes de dados, a eficiência permanece elevada (acima de 80\% em muitos casos) mesmo com 16 threads. Isso confirma que a aplicação Fletcher é "fracamente escalável" (weak scaling), beneficiando-se do aumento do tamanho do problema proporcionalmente aos recursos.
-
-\begin{figure}[hbt!]
-    \centering
-    \includegraphics[width=\textwidth]{../analysis/plots/plot4b_cpu_efficiency_exp2.pdf}
-    \caption{Eficiência em CPU: Experimento 2. Alta eficiência mantida em cargas elevadas.}
-    \label{fig:efficiency_exp2}
-\end{figure}
-
-Por fim, a vazão atinge seus valores máximos no Experimento 2. A Figura \ref{fig:throughput_exp2} mostra que, ao alimentar a CPU com dados suficientes para saturar as unidades de ponto flutuante e mascarar latências de memória, a aplicação atinge um patamar de performance significativamente superior ao observado no primeiro experimento.
-
-\begin{figure}[hbt!]
-    \centering
-    \includegraphics[width=\textwidth]{../analysis/plots/plot2b_throughput_exp2.pdf}
-    \caption{Vazão (MSamples/s): Experimento 2. Máximo desempenho obtido com saturação de recursos.}
-    \label{fig:throughput_exp2}
-\end{figure}
 
 \section{Conclusão}
 
