@@ -50,26 +50,21 @@ The methodology involved executing experiments with pre-defined factors under co
    - Obtain raw data (MSamples/s, execution time and total execution time).
    - Build a linear regression model relating factors to output.
 
+
+* Methodology
 ** Experimental Projects
    Two full factorial experimental projects were carried out for both CPU and GPU.
 
    #+CAPTION: Experimental projects for CPU
-   | Project | Input Data Dimensions                  | Iterations    | Threads        |
-   |---------+----------------------------------------+---------------+----------------+
-   |       1 | 24^3, 56^3, 120^3                      | 10, 100, 1000 | 1, 2, 4, 8, 16 |
-   |       2 | 24^3, 88^3, 152^3, 248^3, 376^3, 504^3 | 25            | 1, 2, 4, 8, 16 |
-
-   with $100$ and $10$ replications, respectively.
-
-* Methodology
-
-** Experimental Projects
-
-   #+CAPTION: Experimental projects for GPU
-   | Project | Input Data Dimensions                  | Iterations    | Replications |
-   |---------+----------------------------------------+---------------+--------------|
-   |       1 | 24^3, 56^3, 120^3                      | 10, 100, 1000 | 100          |
-   |       2 | 24^3, 88^3, 152^3, 248^3, 376^3, 504^3 | 25            | 10           |
+   | Backend | Input Data Dimensions                                | Iterations    | Threads        | Replicações |
+   |---------+------------------------------------------------------+---------------+----------------+-------------|
+   | CPU     | 24^3, 56^3, 120^3                                    | 10, 100, 1000 | 1, 2, 4, 8, 16 |         100 |
+   |---------+------------------------------------------------------+---------------+----------------+-------------|
+   | GPU     | 24^3, 56^3, 120^3                                    | 10, 100, 1000 | -              |         100 |
+   |---------+------------------------------------------------------+---------------+----------------+-------------|
+   | CPU     | \makecell{24^3, 88^3, 152^3, \\ 248^3, 376^3, 504^3} | 25            | 1, 2, 4, 8, 16 |          10 |
+   |---------+------------------------------------------------------+---------------+----------------+-------------|
+   | GPU     | \makecell{24^3, 88^3, 152^3, \\ 248^3, 376^3, 504^3} | 25            | -              |          10 |
 
 * Environment
 
