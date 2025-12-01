@@ -101,8 +101,6 @@ All experiments were executed at PCAD (https://gppd-hpc.inf.ufrgs.br), utilizing
 #+END_SRC
 
 #+RESULTS:
-| /home/dannly/git/perf/phases/3/analysis/plots/plot5b_overhead_percent_exp2.pdf | FALSE |
-
 
 * Experiment 1: Asymptotic Behavior
   Goal: Validate algorithmic behavior with high replication (100x) on moderate problem sizes ($24^3$ to $120^3$).
@@ -136,6 +134,19 @@ All experiments were executed at PCAD (https://gppd-hpc.inf.ufrgs.br), utilizing
 * Throughput (Exp 2)
 GPU dominates the general throughput, displaying a resource saturation at problem size $\approx 150$.
   [[file:../analysis/plots/plot2b_throughput_exp2.pdf]]
+
+* Regression Model (CPU)
+  High accuracy ($R^2 \approx 0.99$) achieved for CPU execution time modeling.
+  #+attr_latex: :height 0.8\textheight
+  [[file:../analysis/plots/lm_cpu_diagnostics.pdf]]
+
+* Regression Model (Draco GPU)
+  Predictive model for the Draco machine (Tesla K20m).
+  [[file:../analysis/plots/lm_draco_gpu_diagnostics.pdf]]
+
+* Regression Model (Beagle GPU)
+  Predictive model for the Beagle machine (GTX 1080 Ti).
+  [[file:../analysis/plots/lm_beagle_gpu_diagnostics.pdf]]
 
 * Conclusion
 
