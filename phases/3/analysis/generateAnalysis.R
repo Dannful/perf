@@ -352,7 +352,7 @@ create_linear_model <- function(data, formula) {
     return (model)
 }
 
-plot_lm <- function(data, model, facet_vars, n_pred = 100) {
+plot_lm <- function(data, model, faceting, n_pred = 100) {
     pred_grid <- data |>
         distinct(across(c(-problem_size, -value))) |>
         crossing(problem_size = seq(min(data$problem_size), 
@@ -368,7 +368,7 @@ plot_lm <- function(data, model, facet_vars, n_pred = 100) {
     p_lm1 <- ggplot(plot_data, aes(x = problem_size, y = value, color = type)) +
         geom_line(data = filter(plot_data, type == "predicted"), linewidth = 1) +
         geom_point(data = filter(plot_data, type == "actual"), alpha = 0.6, size = 2) +
-        facet_grid(facet_vars, scales = "free_y") + 
+        faceting + 
         labs(y = "Computation Time (s)", x = "Problem Size", color = "Type") + 
         scale_color_manual(values = c("actual" = "#E41A1C", "predicted" = "#377EB8")) +
         my_style()
@@ -409,19 +409,19 @@ cp_time_beagle_gpu_model <- create_linear_model(
 p_draco_cpu_lm <- plot_lm(
     cpu_draco_data,
     cp_time_cpu_model,
-    num_threads ~ num_iterations
+    facet_grid(num_threads ~ num_iterations, scales = "free_y")
 )
 
 p_draco_gpu_lm <- plot_lm(
     gpu_draco_data, 
     cp_time_draco_gpu_model,
-    ~ num_iterations
+    facet_wrap(~ num_iterations, scales = "free_y") 
 )
 
 p_beagle_gpu_lm <- plot_lm(
     gpu_beagle_data, 
     cp_time_beagle_gpu_model,
-    ~ num_iterations
+    facet_grid(~ num_iterations, scales = "free_y")
 )
 
 ggsave(file.path(plots_dir, "lm_cpu_diagnostics.pdf"), plot = p_draco_cpu_lm, width = 8, height = 8.5)
