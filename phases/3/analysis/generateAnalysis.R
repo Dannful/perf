@@ -38,7 +38,7 @@ experiment_results_clean <- read.csv(file.path(base_dir, "clean_dataset.csv")) |
             TRUE ~ machine
         ),
         metric_label = case_when(
-            metric_name == "computation_time_s" ~ "Tempo de Computação",
+            metric_name == "computation_time_s" ~ "Tempo de Comp.",
             metric_name == "total_time_s" ~ "Tempo Total",
             TRUE ~ metric_name
         )
@@ -75,7 +75,7 @@ plot_time_analysis <- function(data, exp) {
         linetype = "Métrica"
     ) +
     my_style() +
-    scale_linetype_manual(values = c("Tempo de Computação" = "solid", "Tempo Total" = "dashed")) +
+    scale_linetype_manual(values = c("Tempo de Comp." = "solid", "Tempo Total" = "dashed")) +
     scale_x_continuous(breaks = seq(0, 500, 50))
 
     if (length(unique(df$num_iterations)) > 1) {
