@@ -151,6 +151,6 @@ GPU dominates the general throughput, displaying a resource saturation at proble
 * Conclusion
 
 - *Robustness Verified:* Confirmed $O(n)$ complexity and predictable behavior across all scales.
-- *Overhead Dynamics:* High relative overhead on small inputs limits speedup, but is effectively diluted in larger workloads.
+- *Overhead Dynamics:* High relative overhead on small inputs limits speedup, but is effectively diluted in larger workloads. This phenomenon in GPU, however, requires substantially larger problem sizes, bound by its VRAM. Furthermore, the disk I/O becomes a massive bottleneck as parallelism increases.
 - *High Scalability:* Achieved near-linear speedup and >80% efficiency on large problems, validating HPC readiness.
 - *Future Work:* Solid foundation established for distributed memory implementation (MPI).
