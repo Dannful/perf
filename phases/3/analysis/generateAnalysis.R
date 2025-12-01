@@ -352,24 +352,28 @@ create_linear_model <- function(data, formula) {
     return (model)
 }
 
-plot_lm <- function(data, model, facet_vars) {
-    lm_data_long <- data |>
-        mutate(predicted = predict(model)) |>
-        tidyr::pivot_longer(cols = c("value", "predicted"), 
-                           names_to = "type", 
-                           values_to = "computation_time_s")
-    p_lm1 <- ggplot(lm_data_long, aes(x = problem_size, y = computation_time_s, color = type)) +
-        geom_point(alpha = 0.6) + 
-        geom_line(aes(group = type), alpha = 0.6) + 
+plot_lm <- function(data, model, facet_vars, n_pred = 100) {
+    pred_grid <- data |>
+        distinct(across(c(-problem_size, -value))) |>
+        crossing(problem_size = seq(min(data$problem_size), 
+                                   max(data$problem_size), 
+                                   length.out = n_pred))
+    
+    plot_data <- bind_rows(
+        data |> mutate(type = "actual"),
+        pred_grid |> mutate(type = "predicted", 
+                           value = predict(model, newdata = pred_grid))
+    )
+    
+    p_lm1 <- ggplot(plot_data, aes(x = problem_size, y = value, color = type)) +
+        geom_line(data = filter(plot_data, type == "predicted"), linewidth = 1) +
+        geom_point(data = filter(plot_data, type == "actual"), alpha = 0.6, size = 2) +
         facet_grid(facet_vars, scales = "free_y") + 
-        labs(y = "Computation Time (s)", color = "Type") + 
+        labs(y = "Computation Time (s)", x = "Problem Size", color = "Type") + 
+        scale_color_manual(values = c("actual" = "#E41A1C", "predicted" = "#377EB8")) +
         my_style()
-    grid.newpage()
-    pushViewport(viewport(layout = grid.layout(2, 1, heights = unit(c(0.1, 0.9), "npc"))))
-    grid.text("Linear Model Diagnostics: Actual vs. Predicted", 
-              gp = gpar(fontsize = 16),
-              vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-    print(p_lm1, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+    
+    return(p_lm1)
 }
 
 cpu_draco_data <- experiment_results_clean |>
@@ -399,7 +403,7 @@ cp_time_draco_gpu_model <- create_linear_model(
 
 cp_time_beagle_gpu_model <- create_linear_model(
     gpu_beagle_data, 
-    value ~ I(problem_size^3) * num_iterations
+    value ~ I(problem_size^3)
 )
 
 p_draco_cpu_lm <- plot_lm(
