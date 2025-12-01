@@ -336,6 +336,35 @@ Para as GPUs, os modelos também apresentaram bom ajuste, embora com caracterís
     \label{fig:lm_beagle_gpu}
 \end{figure}
 
+\subsection{Análise de Regressão Linear}
+
+Para formalizar a relação entre os parâmetros de entrada e o tempo de computação, foram desenvolvidos modelos de regressão linear para as diferentes arquiteturas.
+
+Para a CPU (Draco), o modelo atingiu uma precisão excepcional ($R^2 \approx 0.99$), conforme evidenciado na Figura \ref{fig:lm_cpu}. O gráfico de diagnóstico confirma que os valores previstos pelo modelo (linha vermelha) acompanham quase perfeitamente os valores reais observados (pontos pretos), validando a equação baseada na complexidade $O(n)$ e na lei de Amdahl.
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/lm_cpu_diagnostics.pdf}
+    \caption{Diagnóstico do Modelo de Regressão Linear (CPU). A alta aderência entre previsto e real confirma a robustez do modelo.}
+    \label{fig:lm_cpu}
+\end{figure}
+
+Para as GPUs, os modelos também apresentaram bom ajuste, embora com características distintas devido à natureza massivamente paralela e à gestão de memória do dispositivo. As Figuras \ref{fig:lm_draco_gpu} e \ref{fig:lm_beagle_gpu} apresentam os diagnósticos para as máquinas Draco (Tesla K20m) e Beagle (GTX 1080 Ti), respectivamente.
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/lm_draco_gpu_diagnostics.pdf}
+    \caption{Diagnóstico do Modelo de Regressão Linear (GPU Draco).}
+    \label{fig:lm_draco_gpu}
+\end{figure}
+
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/lm_beagle_gpu_diagnostics.pdf}
+    \caption{Diagnóstico do Modelo de Regressão Linear (GPU Beagle).}
+    \label{fig:lm_beagle_gpu}
+\end{figure}
+
 \section{Conclusão}
 
 A análise de desempenho conduzida sobre a aplicação Fletcher permitiu uma caracterização detalhada de seu comportamento em diferentes escalas de processamento. Os experimentos confirmaram rigorosamente a complexidade linear $O(n)$ do algoritmo, demonstrando estabilidade e previsibilidade tanto em CPU quanto em GPU.
