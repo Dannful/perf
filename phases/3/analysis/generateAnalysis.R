@@ -409,21 +409,28 @@ cp_time_beagle_gpu_model <- create_linear_model(
 p_draco_cpu_lm <- plot_lm(
     cpu_draco_data,
     cp_time_cpu_model,
-    facet_grid(num_threads ~ num_iterations, scales = "free_y")
+    facet_wrap(~ num_iterations + num_threads, scales = "free_y", labeller = labeller(
+        num_iterations = function(x) paste0("Iterações: ", x),
+        num_threads = function(x) paste0("Cores: ", x)
+    ))
 )
 
 p_draco_gpu_lm <- plot_lm(
     gpu_draco_data, 
     cp_time_draco_gpu_model,
-    facet_wrap(~ num_iterations, scales = "free_y") 
+    facet_wrap(~ num_iterations, scales = "free_y", labeller = labeller(
+        num_iterations = function(x) paste0("Iterações: ", x)
+    ))
 )
 
 p_beagle_gpu_lm <- plot_lm(
     gpu_beagle_data, 
     cp_time_beagle_gpu_model,
-    facet_grid(~ num_iterations, scales = "free_y")
+    facet_grid(~ num_iterations, scales = "free_y", labeller = labeller(
+        num_iterations = function(x) paste0("Iterações: ", x)
+    ))
 )
 
-ggsave(file.path(plots_dir, "lm_cpu_diagnostics.pdf"), plot = p_draco_cpu_lm, width = 8, height = 8.5)
+ggsave(file.path(plots_dir, "lm_cpu_diagnostics.pdf"), plot = p_draco_cpu_lm, width = 10, height = 8)
 ggsave(file.path(plots_dir, "lm_draco_gpu_diagnostics.pdf"), plot = p_draco_gpu_lm, width = 8, height = 5)
 ggsave(file.path(plots_dir, "lm_beagle_gpu_diagnostics.pdf"), plot = p_beagle_gpu_lm, width = 8, height = 5)
