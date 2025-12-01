@@ -344,13 +344,15 @@ ggsave(file.path(plots_dir, "plot5b_overhead_percent_exp2.pdf"), plot = p_overhe
 # Linear Models for Computation time
 # =============================================================================================== #
 
-pdf(file.path(plots_dir, "lm_diagnostics.pdf"), width = 10, height = 8)
 
-create_linear_model <- function(data, formula, facet_vars = NULL) {
+create_linear_model <- function(data, formula) {
     lm(formula, data = data)
     model <- lm(formula, data = data)
-
     print(summary(model))
+    return (model)
+}
+
+plot_lm <- function(data, model, facet_vars) {
     lm_data_long <- data |>
         mutate(predicted = predict(model)) |>
         tidyr::pivot_longer(cols = c("value", "predicted"), 
@@ -368,25 +370,56 @@ create_linear_model <- function(data, formula, facet_vars = NULL) {
               gp = gpar(fontsize = 16),
               vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
     print(p_lm1, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-    par(mfrow=c(2,2))
-    plot(model)
 }
 
-    
+cpu_draco_data <- experiment_results_clean |>
+    filter(device == "cpu") |>
+    filter(machine == "draco2") |>
+    filter(metric_name == "computation_time_s")
+
+gpu_draco_data <- experiment_results_clean |>
+    filter(device == "gpu") |>
+    filter(machine == "draco1") |>
+    filter(metric_name == "computation_time_s")
+
+gpu_beagle_data <- experiment_results_clean |>
+    filter(device == "gpu") |>
+    filter(machine == "beagle") |>
+    filter(metric_name == "computation_time_s")    
+
 cp_time_cpu_model <- create_linear_model(
-    experiment_results_clean |> filter(device == "cpu") |> filter(metric_name == "computation_time_s"), 
-    value ~ I(problem_size^3) * num_iterations * I(1/num_threads), 
-    num_threads ~ num_iterations
+    cpu_draco_data, 
+    value ~ I(problem_size^3) * num_iterations * I(1/num_threads)
 )
                           
 cp_time_draco_gpu_model <- create_linear_model(
-    experiment_results_clean |> filter(device == "gpu") |> filter(machine == "draco1") |> filter(metric_name == "computation_time_s"), 
-    value ~ I(problem_size^3) * num_iterations, 
-    ~ num_iterations
+    gpu_draco_data, 
+    value ~ I(problem_size^3) * num_iterations
 )
 
 cp_time_beagle_gpu_model <- create_linear_model(
-    experiment_results_clean |> filter(device == "gpu") |> filter(machine == "beagle") |> filter(metric_name == "computation_time_s"), 
-    value ~ I(problem_size^3) * num_iterations, 
+    gpu_beagle_data, 
+    value ~ I(problem_size^3) * num_iterations
+)
+
+p_draco_cpu_lm <- plot_lm(
+    cpu_draco_data,
+    cp_time_cpu_model,
+    num_threads ~ num_iterations
+)
+
+p_draco_gpu_lm <- plot_lm(
+    gpu_draco_data, 
+    cp_time_draco_gpu_model,
     ~ num_iterations
 )
+
+p_beagle_gpu_lm <- plot_lm(
+    gpu_beagle_data, 
+    cp_time_beagle_gpu_model,
+    ~ num_iterations
+)
+
+ggsave(file.path(plots_dir, "lm_cpu_diagnostics.pdf"), plot = p_draco_cpu_lm, width = 8, height = 8.5)
+ggsave(file.path(plots_dir, "lm_draco_gpu_diagnostics.pdf"), plot = p_draco_gpu_lm, width = 8, height = 5)
+ggsave(file.path(plots_dir, "lm_beagle_gpu_diagnostics.pdf"), plot = p_beagle_gpu_lm, width = 8, height = 5)
