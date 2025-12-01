@@ -302,42 +302,49 @@ No lado da CPU, pode-se desenhar um gráfico de gnanho de eficiência, no qual o
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{../analysis/plots/plot3b_cpu_speedup_exp2.pdf}
-    \caption{TODO}
+    \caption{Número de \textit{threads} vs. \textit{speedup}: Experimento 2.}
     \label{fig:speedup2}
 \end{figure}
 
 
-\subsection{Projeções}
+\subsection{Análise de Regressão Linear}
 
-Após a execução do primeiro projeto experimental, observou-se a possibilidade de realizar um novo projeto,
-almejando um tamanho de problema de entrada maior, porém com uma quantidade menor de iterações. Conforme
-as tabelas \ref{tab:projexpcpu} e \ref{tab:projexpgpu}, a primeira bateria experimental confere uma variabilidade menor
-às observações, em virtude da maior quantidade de replicações para cada execução. Entretanto, a maior diversidade de tamanho
-de problema de entrada permite a identificação mais precisa da influência de tal fator na métrica de saída (\textit{MSamples/s}).
+Para formalizar a relação entre os parâmetros de entrada e o tempo de computação, foram desenvolvidos modelos de regressão linear para as diferentes arquiteturas.
 
-Os projetos experimentais supracitados permitiram a obtenção de um $R^2 \approx 0.9898$ para os experimentos de \textbf{CPU} e um
-$R^2 \approx 0.68$ para \textbf{GPU}.
+Para a CPU (Draco), o modelo atingiu uma precisão excepcional ($R^2 \approx 0.99$), conforme evidenciado na Figura \ref{fig:lm_cpu}. O gráfico de diagnóstico confirma que os valores previstos pelo modelo (linha azul) acompanham quase perfeitamente os valores reais observados (pontos vermelhos). Essa relação é fraca para um número baixo de iterações, porém em contexto reais de aplicação, esse número baixo não é realista.
 
-Embora a métrica $R^2$ para CPU seja satisfatória, o modelo revelou que o fator de maior contribuição para a métrica de saída é o
-\textbf{número de threads}, sendo a razão para tal imediata: a complexidade de cálculo associada ao tamanho do problema manteve-se
-similar em sua ordem de grandeza, implicando a situação supracitada, porquanto a aplicação comporta-se conforme $O(n)$ em relação às dimensões do dado
-de entrada. A quantidade de iterações, por sua vez, embora tenha variado razoavelmente em sua magnitude, depende intrinsicamente da complexidade de cálculo
-associada, levando, pois, à sua tênue contribuição para os valores observados.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/lm_cpu_diagnostics.pdf}
+    \caption{Diagnóstico do Modelo de Regressão Linear (CPU). A alta aderência entre previsto e real confirma a robustez do modelo.}
+    \label{fig:lm_cpu}
+\end{figure}
 
-Outrossim, o $R^2$ calculado para a GPU é esperado: dado que a complexidade de cálculo torna-se substancialmente menor em virtude da maior exploração
-do paralelismo, o modelo de regressão dispõe de informações altamente limitadas para determinar como cada fator influencia a saída. Dessa forma, todos os fatores
-acabam por contribuir de maneira similarmente igual e tênue para os valores de saída, conferindo elevada incerteza para o modelo.
+Para as GPUs, os modelos também apresentaram bom ajuste, embora com características distintas devido à natureza massivamente paralela e à gestão de memória do dispositivo. As Figuras \ref{fig:lm_draco_gpu} e \ref{fig:lm_beagle_gpu} apresentam os diagnósticos para as máquinas Draco (Tesla K20m) e Beagle (GTX 1080 Ti), respectivamente.
 
-A seguir, discutem-se os detalhes de cada etapa experimental, integrando as análises visuais à narrativa de desempenho da aplicação.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/lm_draco_gpu_diagnostics.pdf}
+    \caption{Diagnóstico do Modelo de Regressão Linear (GPU Draco).}
+    \label{fig:lm_draco_gpu}
+\end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../analysis/plots/lm_beagle_gpu_diagnostics.pdf}
+    \caption{Diagnóstico do Modelo de Regressão Linear (GPU Beagle).}
+    \label{fig:lm_beagle_gpu}
+\end{figure}
 
 \section{Conclusão}
 
 A análise de desempenho conduzida sobre a aplicação Fletcher permitiu uma caracterização detalhada de seu comportamento em diferentes escalas de processamento. Os experimentos confirmaram rigorosamente a complexidade linear $O(n)$ do algoritmo, demonstrando estabilidade e previsibilidade tanto em CPU quanto em GPU.
 
-A distinção entre os dois projetos experimentais foi crucial para identificar os limites da implementação. Enquanto o primeiro experimento evidenciou o impacto significativo do overhead de gerenciamento de threads em volumes de dados menores, o segundo comprovou a excelente escalabilidade da aplicação quando submetida a cargas de trabalho adequadas. A capacidade de manter a eficiência acima de 80\% com 16 threads em grandes problemas indica que a aplicação é "fracamente escalável" e se beneficia diretamente do aumento da granularidade da tarefa.
+A distinção entre os dois projetos experimentais foi crucial para identificar os limites da implementação. Enquanto o primeiro experimento evidenciou o impacto significativo do \textit{overhead} de gerenciamento de threads em volumes de dados menores, o segundo comprovou a excelente escalabilidade da aplicação quando submetida a cargas de trabalho adequadas. A capacidade de manter a eficiência acima de 80\% com 16 threads em grandes problemas indica que a aplicação é "fracamente escalável" e se beneficia diretamente do aumento da granularidade da tarefa.
 
-Conclui-se que a aplicação Fletcher está bem otimizada para execução intra-nó em arquiteturas modernas. Os resultados obtidos fornecem uma base sólida para o desenvolvimento futuro de uma versão distribuída utilizando MPI, visto que o gargalo de computação local foi minimizado e o comportamento da aplicação é agora bem compreendido.
+Assim como reconhecido por \citet{IOFLETCH}, um grande \textit{bottleneck} da aplicação, principalmente quando usado GPUs, é o IO. Sendo o significativo elemento a restringir a capacidade de computação das GPU quanto a maiores volumes. Outro aspecto, observável é que a linearidade segue a quantidade de memória da GPU. Portanto, para maiores problemas, neste contexto \textit{single-core}, é necessário placas de vídeo com mais memória para executar na projeção desenhada.
+
+A aplicação Fletcher é uma aplicação altamntente escalável, sendo a mais eficiênte quando usando GPU, mesmo com o \textit{bottleneck} de IO. Com isso, ela tem muitos ângulos para crescer e se desenvolver, expandindo para arquiteturas mistaas, multi-core, etc.
 
 %%
 %% The next two lines define the bibliography style to be used, and

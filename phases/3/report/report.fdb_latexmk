@@ -1,20 +1,23 @@
 # Fdb version 3
-["bibtex report"] 1764553557 "report.aux" "report.bbl" "report" 1764553559
+["bibtex report"] 1764555820 "report.aux" "report.bbl" "report" 1764555822
   "/usr/share/texlive/texmf-dist/bibtex/bst/acmart/ACM-Reference-Format.bst" 1638825809 90330 871e55fb6d8dc37a22e9e4941a79e593 ""
-  "report.aux" 1764553559 5828 5fed4d91d5be017bb54888e18b73ca1f "pdflatex"
+  "report.aux" 1764555822 7044 e635b48f876b2fd97fef7fdf5f4dcb67 "pdflatex"
   "report.bib" 1764539429 4294 437092cdfd8c86256261537ad73b0cb5 ""
   (generated)
   "report.bbl"
   "report.blg"
-["pdflatex"] 1764553558 "/home/colle/perf/phases/3/report/report.tex" "report.pdf" "report" 1764553559
-  "../analysis/plots/plot1a_execution_vs_total_exp1.pdf" 1764545708 15324 e1c4a6576ac15f688b951a67d44946c0 ""
-  "../analysis/plots/plot1b_execution_vs_total_exp2.pdf" 1764545708 12696 61bc5e711216f1020495f6c0fde85584 ""
-  "../analysis/plots/plot2b_throughput_exp2.pdf" 1764545709 8727 2b76d3a595fd874b534f9ed79f402f1a ""
-  "../analysis/plots/plot3b_cpu_speedup_exp2.pdf" 1764545710 7586 ee3cc5f6d904240d4708a0d6f93b0fee ""
-  "../analysis/plots/plot5a_overhead_percent_exp1.pdf" 1764545711 9840 f1aabde7b5288106044d58cab29deabe ""
-  "../analysis/plots/plot5b_overhead_percent_exp2.pdf" 1764545712 8373 742b159fb37ba6a8229da528c5603565 ""
+["pdflatex"] 1764555820 "/home/colle/perf/phases/3/report/report.tex" "report.pdf" "report" 1764555822
+  "../analysis/plots/lm_beagle_gpu_diagnostics.pdf" 1764555045 8442 fbe65e836e39c569f6ddfd2ac160906b ""
+  "../analysis/plots/lm_cpu_diagnostics.pdf" 1764555043 52155 8eb7a96df428a292ff33108073961291 ""
+  "../analysis/plots/lm_draco_gpu_diagnostics.pdf" 1764555044 14826 74c6a08705b8365dd93f6370a4726b42 ""
+  "../analysis/plots/plot1a_execution_vs_total_exp1.pdf" 1764555035 15321 6ec99ce5ce54daf21926cb10d02b5989 ""
+  "../analysis/plots/plot1b_execution_vs_total_exp2.pdf" 1764555036 12248 44a0ca687ca19be5dc86354357faee1b ""
+  "../analysis/plots/plot2b_throughput_exp2.pdf" 1764555037 8727 d53e2a220e0d4bb2c4c8538947aa7e74 ""
+  "../analysis/plots/plot3b_cpu_speedup_exp2.pdf" 1764555038 7585 2a8265cff62d64ace9377b485c4e8555 ""
+  "../analysis/plots/plot5a_overhead_percent_exp1.pdf" 1764555039 9840 3f53ef19f930249d029c6b63dab26328 ""
+  "../analysis/plots/plot5b_overhead_percent_exp2.pdf" 1764555039 8373 c695259de985aa57b507ce44caf0b003 ""
   "/etc/texmf/web2c/texmf.cnf" 1750284533 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/colle/perf/phases/3/report/report.tex" 1764553555 20875 bd6ed6982ebfc76cf8427a5c53ee3164 ""
+  "/home/colle/perf/phases/3/report/report.tex" 1764555815 21040 b9bd5d00376890201ac7ba5dd92d7c0a ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc" 1490131464 2921 8ca0eb0831f9bc5da080d3697cfe67bf ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/libertine/lbtn_76gpa5.enc" 1490131464 2933 9ad527ce78d7c5fa0a642dead095f172 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/libertine/lbtn_7grukw.enc" 1490131464 2934 a4a9158faed2e9e89c771b4e3b7fc12f ""
@@ -276,10 +279,10 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1751555336 4379155 98693266ff65f58d9f98aff394de12d2 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1750287560 2799882 2a8c02c13a6056ab8edc00d121443659 ""
-  "report.aux" 1764553559 5828 5fed4d91d5be017bb54888e18b73ca1f "pdflatex"
-  "report.bbl" 1764553558 5436 d54f7453600ba91cf975ba2d8a15ef8b "bibtex report"
-  "report.out" 1764553559 1895 7c92a81d1ed889857d22c4c1e8f0bac8 "pdflatex"
-  "report.tex" 1764553555 20875 bd6ed6982ebfc76cf8427a5c53ee3164 ""
+  "report.aux" 1764555822 7044 e635b48f876b2fd97fef7fdf5f4dcb67 "pdflatex"
+  "report.bbl" 1764555820 5436 d54f7453600ba91cf975ba2d8a15ef8b "bibtex report"
+  "report.out" 1764555822 1994 5a09fd3f138025b839792abf91339853 "pdflatex"
+  "report.tex" 1764555815 21040 b9bd5d00376890201ac7ba5dd92d7c0a ""
   (generated)
   "report.aux"
   "report.log"
